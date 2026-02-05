@@ -1,0 +1,14 @@
+### [DESTROY] Case 1: Xóa thất bại (Do brand này đang có sản phẩm)
+# Giả sử Brand ID 1 đang có sản phẩm liên kết
+DELETE {{baseUrl}}/brands/1
+Accept: application/json
+
+### [DESTROY] Case 2: Xóa thành công (Brand rỗng hoặc mới tạo)
+# Giả sử Brand ID 10 là brand rác, chưa có sản phẩm
+DELETE {{baseUrl}}/brands/8
+Accept: application/json
+
+### [DESTROY] Case 3: Xóa lại cái đã xóa (Sẽ trả về 404)
+# Vì Route Model Binding mặc định không tìm trong thùng rác
+DELETE {{baseUrl}}/brands/8
+Accept: application/json

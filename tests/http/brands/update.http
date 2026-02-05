@@ -1,0 +1,26 @@
+### [UPDATE] Case 1: Cập nhật thành công (Chỉ đổi quốc gia)
+PUT {{baseUrl}}/brands/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "country": "France"
+}
+
+### [UPDATE] Case 2: Đổi tên trùng với thương hiệu khác (Phải báo lỗi 422)
+PUT {{baseUrl}}/brands/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Tên Đã Tồn Tại"
+}
+
+### [UPDATE] Case 3: Tắt trạng thái hoạt động
+PUT {{baseUrl}}/brands/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "is_active": false
+}

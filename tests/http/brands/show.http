@@ -1,0 +1,10 @@
+### Case 1: Xem Brand đang hoạt động (ID 1)
+GET {{baseUrl}}/brands/1
+
+### Case 2: Xem Brand đang tạm ẩn (ID 2)
+# Phải nhận được thông tin kèm status: "inactive"
+GET {{baseUrl}}/brands/2
+
+### Case 3: Xem Brand đã xóa (ID 3)
+# Phải nhận được lỗi 404 (vì mặc định Model Binding không tìm trong thùng rác)
+GET {{baseUrl}}/brands/3

@@ -1,0 +1,27 @@
+### Case 1: Create Brand Successfully
+POST {{baseUrl}}/brands
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Lancômsse",
+    "country": "France"
+}
+
+### Case 2: Validation Error (Missing Name)
+POST {{baseUrl}}/brands
+Content-Type: application/json
+Accept: application/json
+
+{
+    "country": "Vietnam"
+}
+
+### Case 3: Duplicate Name Error
+POST {{baseUrl}}/brands
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Lancôme"
+}
