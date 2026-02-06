@@ -1,0 +1,53 @@
+### [STORE] Case 1: Tạo mới thành công (Full thông tin)
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Dưỡng da mặt",
+    "description": "Các sản phẩm chăm sóc da mặt chuyên sâu",
+    "is_active": true
+}
+
+### [STORE] Case 2: Tạo mới thành công (Chỉ nhập trường bắt buộc)
+# description là nullable -> có thể bỏ qua
+# is_active có default là true -> có thể bỏ qua
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Dụng cụ trang điểm"
+}
+
+### [STORE] Case 3: Lỗi Validation - Thiếu tên (Required)
+# Mong đợi: 422 Unprocessable Content
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Accept: application/json
+
+{
+    "description": "Danh mục này quên nhập tên"
+}
+
+### [STORE] Case 4: Lỗi Validation - Tên đã tồn tại (Unique)
+# Chạy lại request Case 1 để test lỗi này
+# Mong đợi: 422 Unprocessable Content ("The name has already been taken.")
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Dưỡng da mặt"
+}
+
+### [STORE] Case 5: Lỗi Validation - Sai kiểu dữ liệu
+# is_active phải là boolean (true/false/1/0)
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Test sai kiểu",
+    "is_active": "chuỗi-ky-tu-la"
+}

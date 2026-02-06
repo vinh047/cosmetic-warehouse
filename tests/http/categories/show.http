@@ -1,0 +1,15 @@
+### [SHOW] Case 1: Xem chi tiết danh mục đang hoạt động
+# Thay ID = 1 bằng ID thực tế trong DB của bạn
+GET {{baseUrl}}/categories/1
+Accept: application/json
+
+### [SHOW] Case 2: Xem chi tiết danh mục đã bị xóa (Soft Deleted)
+# Vì code dùng `withTrashed()`, nên request này VẪN TRẢ VỀ DỮ LIỆU
+# Thay ID = 10 bằng ID của một category bạn đã delete thử
+GET {{baseUrl}}/categories/5
+Accept: application/json
+
+### [SHOW] Case 3: ID không tồn tại (Test lỗi 404)
+# Mong đợi: Status 404 và message lỗi
+GET {{baseUrl}}/categories/999999
+Accept: application/json

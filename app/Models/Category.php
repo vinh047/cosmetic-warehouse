@@ -22,4 +22,19 @@ class Category extends Model
     {
         return $this->is_active;
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    public function scopeNameSearch($query, $keyword)
+    {
+        return $query->where('name', 'like', "%{$keyword}%");
+    }
 }

@@ -1,0 +1,38 @@
+### [INDEX] 1. Lấy danh sách mặc định (Mới nhất lên đầu, 10 item/trang)
+GET {{baseUrl}}/categories
+Accept: application/json
+
+### [INDEX] 2. Tìm kiếm theo tên (Dựa vào scopeSearch)
+# Test xem có ra đúng danh mục chứa từ khóa "Son" không
+GET {{baseUrl}}/categories?search=lap
+Accept: application/json
+
+### [INDEX] 3. Lọc theo trạng thái Hoạt động (Active)
+# active=1 hoặc active=true -> scopeActive()
+GET {{baseUrl}}/categories?active=1
+Accept: application/json
+
+### [INDEX] 4. Lọc theo trạng thái Ẩn (Inactive)
+# active=0 hoặc active=false -> scopeInactive()
+GET {{baseUrl}}/categories?active=0
+Accept: application/json
+
+### [INDEX] 5. Sắp xếp (Sort & Order)
+# Test sort theo tên A-Z
+GET {{baseUrl}}/categories?sort=name&order=asc
+Accept: application/json
+
+### [INDEX] 6. Tùy chỉnh phân trang (Pagination)
+# Test lấy 20 bản ghi mỗi trang, đang xem trang số 2
+GET {{baseUrl}}/categories?per-page=1&page=3
+Accept: application/json
+
+### [INDEX] 7. Combo "Hủy diệt" (Kết hợp tất cả)
+# Tìm "Son", chỉ lấy Active, sắp xếp cũ nhất lên đầu, lấy 5 cái
+GET {{baseUrl}}/categories?search=lap&active=true&sort=created_at&order=asc&per-page=5
+Accept: application/json
+
+### [INDEX] 8. Test bảo mật Sort (Cột không tồn tại)
+# Gửi cột bậy bạ "password", hệ thống phải tự fallback về latest() chứ ko lỗi SQL
+GET {{baseUrl}}/categories?sort=password
+Accept: application/json

@@ -1,0 +1,54 @@
+### [UPDATE] Case 1: Cập nhật thành công (Sửa toàn bộ thông tin)
+# Thay ID = 1 bằng ID thực tế muốn sửa
+PUT {{baseUrl}}/categories/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Chăm sóc da mặt (Updated)",
+    "description": "Đã cập nhật mô tả mới nhất",
+    "is_active": false
+}
+
+### [UPDATE] Case 2: Cập nhật một phần (Partial Update)
+# Chỉ sửa description, giữ nguyên name và status
+# Nhờ rule 'sometimes' trong Request, không cần gửi name lên vẫn OK
+PUT {{baseUrl}}/categories/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "description": "Chỉ sửa lại mỗi dòng mô tả này thôi"
+}
+
+### [UPDATE] Case 3: Test Unique (Trùng tên với chính nó - Phải thành công)
+# Gửi lại đúng tên hiện tại -> Logic ignore($id) phải hoạt động và KHÔNG báo lỗi
+PUT {{baseUrl}}/categories/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Chăm sóc da mặt (Updated)"
+}
+
+### [UPDATE] Case 4: Test Unique (Trùng tên với danh mục KHÁC - Phải lỗi)
+# Giả sử trong DB đã có danh mục tên "Son môi" (ID 2)
+# Cố tình đổi ID 1 thành tên "Son môi" -> Phải báo lỗi 422
+PUT {{baseUrl}}/categories/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Laptop"
+}
+
+### [UPDATE] Case 5: Test Logic TRASHED (Cập nhật danh mục đã xóa)
+# Thay ID = 10 bằng một ID đã bị xóa mềm (deleted_at is not null)
+# Mong đợi: Trả về lỗi 422 kèm message "Cannot update a deleted resource..."
+PUT {{baseUrl}}/categories/4
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Cố tình sửa đồ đã xóa"
+}

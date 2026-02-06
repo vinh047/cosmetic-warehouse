@@ -1,0 +1,17 @@
+### [DELETE] Case 1: Xóa thất bại (Do danh mục đang có sản phẩm)
+# Hãy chọn một ID của category đang chứa ít nhất 1 sản phẩm
+# Mong đợi: Status 422 và message báo lỗi kèm 'products_count'
+DELETE {{baseUrl}}/categories/1
+Accept: application/json
+
+### [DELETE] Case 2: Xóa thành công (Danh mục rỗng)
+# Hãy chọn một ID category mới tạo hoặc không chứa sản phẩm nào
+# Mong đợi: Status 200 và message thành công
+DELETE {{baseUrl}}/categories/4
+Accept: application/json
+
+### [DELETE] Case 3: Xóa lại cái đã xóa (Hoặc ID không tồn tại)
+# Vì Route Model Binding mặc định không tìm trong thùng rác
+# Mong đợi: Status 404 Not Found
+DELETE {{baseUrl}}/categories/5
+Accept: application/json
