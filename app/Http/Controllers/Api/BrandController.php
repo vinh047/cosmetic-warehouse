@@ -16,6 +16,7 @@ class BrandController extends Controller
     public function index(Request $request)
     {
         $brands = Brand::query()
+            ->withCount('products')
             ->when($request->filled('search'), fn($q) => $q->search($request->search))
             ->when($request->has('active'), function ($q) use ($request) {
                 return $request->boolean('active') ? $q->active() : $q->inactive();
@@ -27,7 +28,7 @@ class BrandController extends Controller
                 $sortOrder = $request->get('order', 'desc');
 
                 // Bảo mật: Chỉ cho phép sort các cột hợp lệ để tránh SQL Injection
-                $allowedColumns = ['name', 'country', 'created_at', 'is_active'];
+                $allowedColumns = ['id', 'name', 'country', 'created_at', 'is_active'];
                 if (in_array($sortColumn, $allowedColumns)) {
                     return $q->orderBy($sortColumn, $sortOrder);
                 }
@@ -57,17 +58,9 @@ class BrandController extends Controller
      */
     public function show(string $id)
     {
-        $brand = Brand::withTrashed()
-            ->withCount('products')
+        $brand = Brand::withCount('products')
             ->with(['products'])
-            ->find($id);
-
-        if (!$brand) {
-            return response()->json(['message' => 'Brand not found.'], 404);
-        }
-
-        // Kiểm tra auth
-        // update
+            ->findOrFail($id);
 
         return new BrandResource($brand);
     }
@@ -77,12 +70,6 @@ class BrandController extends Controller
      */
     public function update(BrandRequest $request, Brand $brand)
     {
-        if ($brand->trashed()) {
-            return response()->json([
-                'message' => 'Cannot update a deleted resource. Please restore it first.'
-            ], 422);
-        }
-
         $brand->update($request->validated());
 
         return new BrandResource($brand);
