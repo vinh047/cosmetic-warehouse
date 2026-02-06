@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:8000/api
+
+### [INDEX] 1. Lấy danh sách mặc định
+# Mục đích: Kiểm tra xem data có trả về không và có kèm thông tin Brand/Category (Eager Loading) không?
+GET {{baseUrl}}/products
+Accept: application/json
+
+### [INDEX] 2. Tìm kiếm Đa năng (Search)
+# Logic Controller: where('name', 'like', ...) OR where('sku', 'like', ...)
+# Test 1: Nhập tên sản phẩm (VD: iPhone)
+# Test 2: Nhập một phần mã SKU (VD: IP15, 256)
+GET {{baseUrl}}/products?search=123
+Accept: application/json
+
+### [INDEX] 3. Lọc theo Thương hiệu (Brand)
+# Thay brand_id = ID thực tế trong DB của bạn (Ví dụ: ID của Apple)
+GET {{baseUrl}}/products?brand_id=1
+Accept: application/json
+
+### [INDEX] 4. Lọc theo Danh mục (Category)
+# Thay category_id = ID thực tế (Ví dụ: ID của Điện thoại)
+GET {{baseUrl}}/products?category_id=1
+Accept: application/json
+
+### [INDEX] 5. "Combo" Bộ lọc (Filter Combination)
+# Test tình huống thực tế: Khách tìm "iPhone" (search) thuộc hãng "Apple" (brand)
+GET {{baseUrl}}/products?search=3&brand_id=2
+Accept: application/json
+
+### [INDEX] 6. Phân trang (Pagination)
+# Test lấy 5 sản phẩm mỗi trang, và đang xem trang số 2
+GET {{baseUrl}}/products?per-page=5&page=2
+Accept: application/json
+
+### [INDEX] 7. Test trường hợp Không tìm thấy (Empty State)
+# Nhập từ khóa linh tinh để đảm bảo API trả về mảng rỗng [] chứ không lỗi
+GET {{baseUrl}}/products?search=khongcotrongkho123
+Accept: application/json

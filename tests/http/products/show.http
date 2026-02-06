@@ -1,0 +1,18 @@
+@baseUrl = http://localhost:8000/api
+
+### [SHOW] 1. Xem chi tiết thành công
+# Mục đích: Kiểm tra xem thông tin Brand và Category có được load ra không
+# Thay ID = 1 bằng ID sản phẩm thực tế
+GET {{baseUrl}}/products/1
+Accept: application/json
+
+### [SHOW] 2. Sản phẩm không tồn tại (Test 404)
+# Route Model Binding sẽ tự động trả về 404 nếu không tìm thấy ID
+GET {{baseUrl}}/products/999999
+Accept: application/json
+
+### [SHOW] 3. Sản phẩm đã bị xóa (Test logic "Tuyệt tình")
+# Nếu bạn đã xóa mềm (Soft Delete) sản phẩm ID 10
+# Mong đợi: 404 Not Found (Vì bạn không dùng withTrashed() ở route binding)
+GET {{baseUrl}}/products/10
+Accept: application/json

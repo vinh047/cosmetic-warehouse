@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('brands', BrandController::class);
 Route::apiResource('categories', CategoryController::class);
+Route::apiResource('products', ProductController::class);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -22,7 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Products
-    Route::apiResource('products', ProductController::class);
 
     // Brand
+
+    // Category
 });

@@ -1,0 +1,18 @@
+@baseUrl = http://localhost:8000/api
+
+### [DELETE] Case 1: Xóa thành công (Sản phẩm rỗng)
+# Điều kiện: Sản phẩm này chưa từng được nhập kho (bảng product_batches chưa có record nào)
+# Mong đợi: Status 200 OK + Message "deleted successfully"
+DELETE {{baseUrl}}/products/11
+Accept: application/json
+
+### [DELETE] Case 2: Xóa thất bại (Do dính ràng buộc Lịch sử nhập)
+# Điều kiện: Sản phẩm này ĐÃ từ có trong bảng product_batches
+# Mong đợi: Status 422 Unprocessable Content + Message "cannot be deleted... import history"
+DELETE {{baseUrl}}/products/1
+Accept: application/json
+
+### [DELETE] Case 3: Xóa sản phẩm không tồn tại (hoặc đã xóa rồi)
+# Mong đợi: Status 404 Not Found (Do Route Model Binding tự chặn)
+DELETE {{baseUrl}}/products/999999
+Accept: application/json

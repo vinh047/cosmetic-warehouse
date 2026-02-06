@@ -1,0 +1,73 @@
+@baseUrl = http://localhost:8000/api
+
+### [UPDATE] Case 1: Cập nhật thành công (Giữ nguyên SKU cũ)
+# Test logic: Rule::unique(...)->ignore($id)
+# Nếu logic đúng, gửi lại SKU cũ ("IP15PM-256-NAT") sẽ KHÔNG bị báo lỗi trùng.
+PUT {{baseUrl}}/products/11
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "iPhone 15 Pro Max (Giảm giá sốc)",
+    "sku": "IP15PM-256-NAT1",
+    "brand_id": 1,
+    "category_id": 1,
+    "price": 29990000, 
+    "description": "Cập nhật giá mới nhất tháng 2",
+    "is_active": true
+}
+
+### [UPDATE] Case 2: Cập nhật đổi SKU mới (Thành công)
+# Test logic: Đổi sang một mã chưa từng tồn tại
+PUT {{baseUrl}}/products/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "iPhone 15 Pro Max (Đổi mã kho)",
+    "sku": "IP15PM-256-NEW-CODE",
+    "brand_id": 1,
+    "category_id": 1,
+    "price": 29990000
+}
+
+### [UPDATE] Case 3: Lỗi trùng SKU với sản phẩm KHÁC
+# Giả sử trong DB có sản phẩm ID 2 đang dùng SKU "IP14-128-BLK"
+# Cố tình sửa ID 1 thành SKU của ID 2 -> Phải báo lỗi
+PUT {{baseUrl}}/products/2
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Test Trùng SKU",
+    "sku": "IP15PM-256-NEW-CODE", 
+    "brand_id": 1,
+    "category_id": 1,
+    "price": 20000000
+}
+
+### [UPDATE] Case 4: Lỗi Khóa ngoại (Brand/Category không tồn tại)
+# Test logic: Rule::exists()
+PUT {{baseUrl}}/products/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Test Sai ID Brand",
+    "sku": "TEST-FAIL-FK",
+    "brand_id": 99999,
+    "category_id": 1,
+    "price": 100000
+}
+
+### [UPDATE] Case 5: Cập nhật 1 phần (Nếu dùng PATCH)
+# Lưu ý: Nếu bạn định nghĩa route là apiResource thì nó hỗ trợ cả PUT và PATCH.
+# PATCH thường dùng để sửa 1 trường (ví dụ chỉ sửa giá).
+# Yêu cầu: Trong ProductRequest, các rule phải có 'sometimes' hoặc logic tương tự.
+PATCH {{baseUrl}}/products/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "price": 10
+}

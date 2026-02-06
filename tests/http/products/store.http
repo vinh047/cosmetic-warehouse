@@ -1,0 +1,60 @@
+@baseUrl = http://localhost:8000/api
+
+### [STORE] 1. Tạo mới thành công (Full thông tin)
+# Lưu ý: Sửa brand_id và category_id tương ứng với dữ liệu thật trong DB của bạn
+POST {{baseUrl}}/products
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "iPhone 15 Pro Max 256GB",
+    "sku": "IP15PM-256-NAT", 
+    "brand_id": 1,
+    "category_id": 1,
+    "price": 34990000,
+    "description": "Màu Titan Tự Nhiên, VN/A",
+    "is_active": true
+}
+
+### [STORE] 2. Lỗi Validation - Trùng SKU (Unique)
+# Gửi lại request y hệt bên trên (hoặc chỉ trùng SKU)
+# Mong đợi: 422 Unprocessable Content ("The sku has already been taken.")
+POST {{baseUrl}}/products
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "iPhone 15 Pro Max Khác",
+    "sku": "IP15PM-256-NAT",
+    "brand_id": 1,
+    "category_id": 1,
+    "price": 35000000
+}
+
+### [STORE] 3. Lỗi Validation - Khóa ngoại không tồn tại (Foreign Key)
+# Gửi brand_id hoặc category_id số to bất kì (chưa có trong DB)
+# Mong đợi: 422 ("The selected brand id is invalid.")
+POST {{baseUrl}}/products
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Sản phẩm Test Lỗi",
+    "sku": "TEST-FAIL-01",
+    "brand_id": 99999,
+    "category_id": 99999,
+    "price": 100000
+}
+
+### [STORE] 4. Lỗi Validation - Sai định dạng (Type Error)
+# price gửi text, sku gửi ký tự đặc biệt (nếu có regex), thiếu name
+POST {{baseUrl}}/products
+Content-Type: application/json
+Accept: application/json
+
+{
+    "sku": "sku sai @#$",
+    "brand_id": 1,
+    "category_id": 1,
+    "price": "hai mươi triệu"
+}
