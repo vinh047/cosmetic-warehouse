@@ -17,23 +17,7 @@ class CategoryController extends Controller
     {
         $categories = Category::query()
             ->withCount('products')
-            ->when($request->filled('search'), fn($q) => $q->nameSearch($request->search))
-            ->when($request->has('active'), function ($q) use ($request) {
-                return $request->boolean('active') ? $q->active() : $q->inactive();
-            })
-            ->when($request->filled('sort'), function ($q) use ($request) {
-                $sortColumn = $request->get('sort', 'created_at');
-                $sortOrder = $request->get('order', 'desc');
-
-                $allowedColumns = ['id', 'name', 'created_at', 'is_active'];
-
-                if (in_array($sortColumn, $allowedColumns)) {
-                    return $q->orderBy($sortColumn, $sortOrder);
-                }
-            }, function ($q) {
-                // Nếu không truyền sort thì mặc định dùng latest
-                return $q->latest();
-            })
+            ->filter($request)
             ->paginate($request->get('per-page', 10));
 
         return CategoryResource::collection($categories);

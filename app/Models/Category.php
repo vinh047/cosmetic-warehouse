@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\CommonScopes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, CommonScopes;
 
     protected $fillable = ['name', 'description', 'is_active'];
 
@@ -23,18 +24,18 @@ class Category extends Model
         return $this->is_active;
     }
 
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    public function scopeInactive($query)
-    {
-        return $query->where('is_active', false);
-    }
-
     public function scopeNameSearch($query, $keyword)
     {
         return $query->where('name', 'like', "%{$keyword}%");
+    }
+
+    public function scopeFilter($query, $request)
+    {
+        return $query
+            ->when($request->has('active'), function ($q) use ($request) {
+                $q->byStatus($request->boolean('active'));
+            })
+            ->nameSearch($request->search)
+            ->sort($request, ['id', 'name', 'created_at', 'is_active']);
     }
 }

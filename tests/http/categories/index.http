@@ -19,7 +19,7 @@ Accept: application/json
 
 ### [INDEX] 5. Sắp xếp (Sort & Order)
 # Test sort theo tên A-Z
-GET {{baseUrl}}/categories?sort=name&order=asc
+GET {{baseUrl}}/categories?sort=name&order=desc
 Accept: application/json
 
 ### [INDEX] 6. Tùy chỉnh phân trang (Pagination)
