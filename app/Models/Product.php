@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\CommonScopes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, CommonScopes;
 
     protected $fillable = ['name', 'sku', 'category_id', 'brand_id', 'price', 'description', 'is_active'];
 
@@ -33,11 +34,6 @@ class Product extends Model
         return $this->is_active;
     }
 
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
     public function scopeBrand($query, $brandId)
     {
         if ($brandId) {
@@ -61,14 +57,18 @@ class Product extends Model
                     ->orWhere('sku', 'like', "%$keyword%");
             });
         }
+        return $query;
     }
 
     public function scopeFilter($query, $request)
     {
         return $query
+            ->when($request->has('active'), function ($q) use ($request) {
+                $q->byStatus($request->boolean('active'));
+            })
             ->brand($request->brand_id)
             ->category($request->category_id)
-            ->search($request->search);
+            ->search($request->search)
+            ->sort($request, ['id', 'name', 'sku', 'price', 'is_active']);
     }
-
 }
