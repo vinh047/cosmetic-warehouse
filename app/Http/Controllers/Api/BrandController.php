@@ -17,25 +17,7 @@ class BrandController extends Controller
     {
         $brands = Brand::query()
             ->withCount('products')
-            ->when($request->filled('search'), fn($q) => $q->search($request->search))
-            ->when($request->has('active'), function ($q) use ($request) {
-                return $request->boolean('active') ? $q->active() : $q->inactive();
-            })
-            ->when($request->filled('sort'), function ($q) use ($request) {
-                // Lấy cột cần sort, mặc định là 'created_at'
-                $sortColumn = $request->get('sort', 'created_at');
-                // Lấy hướng sort (asc/desc), mặc định là 'desc'
-                $sortOrder = $request->get('order', 'desc');
-
-                // Bảo mật: Chỉ cho phép sort các cột hợp lệ để tránh SQL Injection
-                $allowedColumns = ['id', 'name', 'country', 'created_at', 'is_active'];
-                if (in_array($sortColumn, $allowedColumns)) {
-                    return $q->orderBy($sortColumn, $sortOrder);
-                }
-            }, function ($q) {
-                // Nếu không truyền sort thì mặc định dùng latest
-                return $q->latest();
-            })
+            ->filter($request)
             ->paginate($request->get('per-page', 10));
 
         return BrandResource::collection($brands);
@@ -56,11 +38,9 @@ class BrandController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Brand $brand)
     {
-        $brand = Brand::withCount('products')
-            ->with(['products'])
-            ->findOrFail($id);
+        $brand->load('products');
 
         return new BrandResource($brand);
     }

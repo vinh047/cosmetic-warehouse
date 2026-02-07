@@ -4,16 +4,16 @@ Accept: application/json
 
 ### 2. [PAGINATION] Lấy danh sách với số lượng bản ghi tùy chỉnh (Limit)
 # Trường hợp Frontend muốn hiển thị ít hoặc nhiều bản ghi hơn trên 1 trang
-GET {{baseUrl}}/brands?per-page=5
+GET {{baseUrl}}/brands?per-page=2
 Accept: application/json
 
 ### 3. [PAGINATION] Lấy dữ liệu ở trang cụ thể (Trang 2)
-GET {{baseUrl}}/brands?per-page=1&page=2
+GET {{baseUrl}}/brands?per-page=1&page=3
 Accept: application/json
 
 ### 4. [SEARCH] Tìm kiếm thương hiệu theo từ khóa (Tên hoặc Quốc gia)
 # Logic: Trả về các bản ghi chứa chữ "App"
-GET {{baseUrl}}/brands?search=App
+GET {{baseUrl}}/brands?search=kor
 Accept: application/json
 
 ### 5. [FILTER] Lọc các thương hiệu đang hoạt động
