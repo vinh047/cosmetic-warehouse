@@ -1,0 +1,21 @@
+@baseUrl = http://localhost:8000/api
+@warehouseIdEmpty = 1
+# ID của kho trống (quantity = 0) -> Xóa được
+@warehouseIdHasStock = 2
+# ID của kho đang có hàng (quantity > 0) -> Không xóa được
+
+### [DESTROY] 1. Xóa kho thành công (Kho trống)
+# Mong đợi: 204 No Content
+DELETE {{baseUrl}}/warehouses/3
+Accept: application/json
+
+### [DESTROY] 2. Xóa kho thất bại (Kho đang có hàng)
+# Mong đợi: 422 Unprocessable Entity
+# Message: "Không thể xóa kho hàng này vì vẫn còn hàng tồn kho..."
+DELETE {{baseUrl}}/warehouses/{{warehouseIdHasStock}}
+Accept: application/json
+
+### [DESTROY] 3. Xóa kho thất bại (Kho không tồn tại)
+# Mong đợi: 404 Not Found
+DELETE {{baseUrl}}/warehouses/999999
+Accept: application/json

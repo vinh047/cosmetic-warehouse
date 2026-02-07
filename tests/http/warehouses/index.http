@@ -1,0 +1,39 @@
+@baseUrl = http://localhost:8000/api
+
+### [INDEX] 1. Lấy danh sách mặc định
+# Mục đích: Kiểm tra xem data có trả về không?
+# Quan trọng: Kiểm tra xem field "total_quantity" (do withSum tính) có hiện ra trong JSON không.
+GET {{baseUrl}}/warehouses
+Accept: application/json
+
+### [INDEX] 2. Tìm kiếm (Search)
+# Logic: Tìm theo 'name' HOẶC 'location'
+# Thử nhập tên kho hoặc địa chỉ (Ví dụ: "HCM", "Hà Nội", "Kho Tổng")
+GET {{baseUrl}}/warehouses?search=HCM
+Accept: application/json
+
+### [INDEX] 3. Lọc theo Trạng thái (Active)
+# Test 1: Chỉ lấy kho đang hoạt động
+GET {{baseUrl}}/warehouses?active=1
+Accept: application/json
+
+### [INDEX] 4. Lọc theo Trạng thái (Inactive)
+# Test 2: Chỉ lấy kho đang bị khóa/ẩn
+GET {{baseUrl}}/warehouses?active=0
+Accept: application/json
+
+### [INDEX] 5. Sắp xếp (Sort)
+# Logic: Sort theo các cột cho phép trong Model (name, location, created_at...)
+# Test: Sắp xếp tên kho từ A-Z
+GET {{baseUrl}}/warehouses?sort=name&order=asc
+Accept: application/json
+
+### [INDEX] 6. Phân trang (Pagination)
+# Test: Lấy 5 kho mỗi trang, và xem trang số 2
+GET {{baseUrl}}/warehouses?per-page=1&page=2
+Accept: application/json
+
+### [INDEX] 7. "Combo" Tổng hợp (Real-world scenario)
+# Test kết hợp: Tìm kho tên "Kho", đang Active, sắp xếp mới nhất
+GET {{baseUrl}}/warehouses?search=miền&active=1&sort=created_at&order=desc
+Accept: application/json

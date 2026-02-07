@@ -1,0 +1,62 @@
+@baseUrl = http://localhost:8000/api
+
+### [STORE] 1. Tạo kho mới thành công (Full thông tin)
+# Mong đợi: 201 Created
+POST {{baseUrl}}/warehouses
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Tổng Đà Nẵng",
+    "location": "Số 10 Nguyễn Văn Linh, Đà Nẵng",
+    "is_active": true
+}
+
+### [STORE] 2. Tạo kho mới thành công (Ít thông tin nhất)
+# Test trường hợp chỉ gửi field bắt buộc (name), các field khác (location, is_active) tự lấy null hoặc default
+# Mong đợi: 201 Created
+POST {{baseUrl}}/warehouses
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Cần Thơ (Tạm)"
+}
+
+### [STORE] 3. Lỗi Validation - Trùng tên kho (Unique)
+# Gửi lại data của Request 1 ("Kho Tổng Đà Nẵng")
+# Mong đợi: 422 Unprocessable Content
+# Message: "Tên kho hàng này đã tồn tại..." (Do bạn đã config messages trong Request)
+POST {{baseUrl}}/warehouses
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Tổng Đà Nẵng", 
+    "location": "Địa chỉ khác",
+    "is_active": true
+}
+
+### [STORE] 4. Lỗi Validation - Thiếu tên kho (Required)
+# Mong đợi: 422 Unprocessable Content
+# Message: "Vui lòng nhập tên kho hàng."
+POST {{baseUrl}}/warehouses
+Content-Type: application/json
+Accept: application/json
+
+{
+    "location": "Kho không tên",
+    "is_active": true
+}
+
+### [STORE] 5. Lỗi Data Type - Sai kiểu dữ liệu
+# is_active gửi string linh tinh không phải boolean/0/1
+# Mong đợi: 422 hoặc được convert nếu có prepareForValidation
+POST {{baseUrl}}/warehouses
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Test Lỗi",
+    "is_active": "chuoi-ki-tu-sai"
+}

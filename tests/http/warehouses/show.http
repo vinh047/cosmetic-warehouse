@@ -1,0 +1,17 @@
+@baseUrl = http://localhost:8000/api
+@warehouseId = 1 
+# Thay ID = 1 bằng ID thực tế trong database của bạn
+
+### [SHOW] 1. Xem chi tiết kho hàng (Thành công)
+# Mong đợi: 200 OK
+# Kiểm tra Logic:
+# 1. "total_quantity" và "total_batches": Phải có giá trị số (do Controller đã loadSum/loadCount).
+# 2. "stocks": Phải là một mảng danh sách hàng hóa (do Controller đã load relation).
+GET {{baseUrl}}/warehouses/2
+Accept: application/json
+
+### [SHOW] 2. Xem chi tiết kho hàng (Lỗi không tồn tại)
+# Mong đợi: 404 Not Found
+# Logic: Laravel tự động ném 404 nếu Route Model Binding không tìm thấy ID này.
+GET {{baseUrl}}/warehouses/999999
+Accept: application/json

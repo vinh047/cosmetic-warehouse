@@ -1,0 +1,66 @@
+@baseUrl = http://localhost:8000/api
+@warehouseId = 1
+# Thay ID = 1 bằng ID thực tế bạn muốn sửa
+
+### [UPDATE] 1. Cập nhật toàn bộ thông tin (PUT)
+# Mong đợi: 200 OK
+# Logic: Thay đổi cả tên, địa chỉ và trạng thái
+PUT {{baseUrl}}/warehouses/{{warehouseId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Tổng TP.HCM (Đã Sửa)",
+    "location": "Số 1 Lê Duẩn, Quận 1",
+    "is_active": false
+}
+
+### [UPDATE] 2. Cập nhật một phần - Chỉ đổi trạng thái (PATCH)
+# Mong đợi: 200 OK
+# Logic: Chỉ gửi is_active, các trường khác (name, location) giữ nguyên.
+# Lưu ý: Request Validation của bạn phải có rule 'sometimes' cho 'name' thì cái này mới chạy được.
+PATCH {{baseUrl}}/warehouses/{{warehouseId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "is_active": true
+}
+
+### [UPDATE] 3. Test tính năng "Ignore Self" (Tự bỏ qua chính mình)
+# Mong đợi: 200 OK (KHÔNG được báo lỗi trùng tên)
+# Logic: Gửi lại đúng cái tên hiện tại của kho này. Validator phải hiểu là "đang update chính nó" nên không báo lỗi unique.
+PUT {{baseUrl}}/warehouses/{{warehouseId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Tổng TP.HCM (Đã Sửa)",
+    "location": "Địa chỉ mới",
+    "is_active": true
+}
+
+### [UPDATE] 4. Test lỗi trùng tên (Unique Validation)
+# Mong đợi: 422 Unprocessable Content
+# Logic: Cố tình đổi tên thành tên của một kho KHÁC (đang tồn tại ở ID khác).
+PUT {{baseUrl}}/warehouses/{{warehouseId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Miền Bắc",
+    "location": "Địa chỉ test lỗi",
+    "is_active": true
+}
+
+### [UPDATE] 5. Test lỗi 404 Not Found
+# Mong đợi: 404 Not Found
+# Logic: Update một ID không tồn tại
+PUT {{baseUrl}}/warehouses/999999
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Kho Ma",
+    "is_active": true
+}
