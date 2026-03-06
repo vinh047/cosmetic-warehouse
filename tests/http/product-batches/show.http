@@ -1,0 +1,37 @@
+@baseUrl = http://localhost:8000/api
+@token = YOUR_ACCESS_TOKEN_HERE
+
+### ======================================
+### [SHOW] 1. Lấy chi tiết 1 lô hàng (Hợp lệ)
+# Mục đích:
+# - Kiểm tra API trả về đúng batch
+# - Có product + current_stock
+# - Không bị null relation
+GET {{baseUrl}}/product-batches/2
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### ======================================
+### [SHOW] 2. Lỗi 404 - Không tồn tại batch
+# Test ID không có trong DB
+# Mong đợi: 404 Not Found
+GET {{baseUrl}}/product-batches/999999
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### ======================================
+### [SHOW] 3. Lỗi Unauthorized - Chưa đăng nhập
+# Không gửi token
+# Mong đợi: 401 Unauthorized
+GET {{baseUrl}}/product-batches/1
+Accept: application/json
+
+
+### ======================================
+### [SHOW] 4. Token sai / hết hạn
+# Test token không hợp lệ
+GET {{baseUrl}}/product-batches/1
+Authorization: Bearer invalid_token_123
+Accept: application/json

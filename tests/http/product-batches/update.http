@@ -1,0 +1,54 @@
+@baseUrl = http://localhost:8000/api
+@token = 1|your_sanctum_token_here
+@batchId = 1
+
+### [UPDATE] Cập nhật thông tin lô hàng (Thành công)
+# Thay đổi ngày hết hạn hoặc mã lô hàng
+PUT {{baseUrl}}/product-batches/{{batchId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "product_id": 1,
+    "batch_code": "BATCH-2026-NEW",
+    "manufacture_date": "2025-10-10",
+    "expiry_date": "2027-10-10",
+    "is_active": true
+}
+
+### [UPDATE] Cập nhật một phần thông tin (PATCH)
+# Thường dùng khi chỉ muốn bật/tắt trạng thái is_active
+PATCH {{baseUrl}}/product-batches/{{batchId}}
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "is_active": false
+}
+
+### [UPDATE] Lỗi Validation: Trùng batch_code
+# Giả sử BATCH-001 đã tồn tại ở một lô hàng khác
+PUT {{baseUrl}}/product-batches/{{batchId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "product_id": 1,
+    "batch_code": "LOT-1-002", 
+    "manufacture_date": "2025-01-01",
+    "expiry_date": "2026-01-01"
+}
+
+### [UPDATE] Lỗi Validation: Ngày hết hạn trước ngày sản xuất
+PUT {{baseUrl}}/product-batches/{{batchId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "product_id": 1,
+    "batch_code": "BATCH-ERR",
+    "manufacture_date": "2026-01-01",
+    "expiry_date": "2025-01-01"
+}

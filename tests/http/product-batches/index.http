@@ -1,0 +1,149 @@
+@baseUrl = http://localhost:8000/api
+
+@token = YOUR_TOKEN_HERE
+
+### =========================
+### HEADER CHUNG
+### =========================
+# Khi test nhớ thay token thật
+# Authorization: Bearer {{token}}
+
+### =========================
+### [INDEX] 1. Lấy danh sách mặc định
+### =========================
+# Mục đích:
+# - Kiểm tra API có trả data không
+# - Kiểm tra pagination mặc định
+# - Kiểm tra field current_stock (withSum) có xuất hiện không
+
+GET {{baseUrl}}/product-batches
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 2. Tìm kiếm (Search)
+### =========================
+# Logic:
+# - Tìm theo batch_code
+# Ví dụ: B2026, LOT01, TEST...
+
+GET {{baseUrl}}/product-batches?search=LOT-2-002
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 3. Lọc theo Product
+### =========================
+# Logic:
+# - Lấy tất cả batch của 1 sản phẩm
+
+GET {{baseUrl}}/product-batches?product_id=1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 4. Lọc theo Hạn sử dụng (Expiry From - To)
+### =========================
+# Logic:
+# - Lấy batch trong khoảng ngày hết hạn
+
+GET {{baseUrl}}/product-batches?expiry_from=2025-01-01&expiry_to=2027-12-31
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 5. Lọc theo Trạng thái hết hạn (Expired)
+### =========================
+
+### 5.1. Đã hết hạn
+GET {{baseUrl}}/product-batches?is_expired=true
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### 5.2. Chưa hết hạn
+GET {{baseUrl}}/product-batches?is_expired=false
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 6. Lọc theo Tồn kho (Has Stock)
+### =========================
+
+### 6.1. Còn hàng
+GET {{baseUrl}}/product-batches?has_stock=true
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### 6.2. Hết hàng
+GET {{baseUrl}}/product-batches?has_stock=false
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 7. Lọc theo Trạng thái Active / Inactive
+### =========================
+
+### 7.1. Active
+GET {{baseUrl}}/product-batches?active=1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### 7.2. Inactive
+GET {{baseUrl}}/product-batches?active=0
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 8. Sắp xếp (Sort)
+### =========================
+# Logic:
+# - Sort theo các field cho phép:
+#   batch_code, manufacture_date, expiry_date, is_active
+
+### 8.1. Sort expiry_date ASC
+GET {{baseUrl}}/product-batches?sort=expiry_date
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### 8.2. Sort expiry_date DESC
+GET {{baseUrl}}/product-batches?sort=-expiry_date
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 9. Phân trang (Pagination)
+### =========================
+# Test: 5 record mỗi trang, trang số 2
+
+GET {{baseUrl}}/product-batches?per-page=5&page=4
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### =========================
+### [INDEX] 10. Combo Tổng hợp (Real-world Scenario)
+### =========================
+# Tình huống thực tế:
+# - Lọc batch của product_id = 1
+# - Chưa hết hạn
+# - Còn hàng
+# - Đang active
+# - Tìm batch_code chứa "B"
+# - Sort mới nhất
+# - Phân trang
+
+GET {{baseUrl}}/product-batches?product_id=2&search=l&is_expired=false&has_stock=true&active=1&sort=-expiry_date&per-page=10&page=1
+Authorization: Bearer {{token}}
+Accept: application/json

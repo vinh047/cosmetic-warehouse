@@ -1,0 +1,112 @@
+@baseUrl = http://localhost:8000/api
+
+### =========================
+### [STORE] 1. Tạo Batch Thành Công (Full Data)
+### =========================
+# Mục đích:
+# - Test tạo batch mới hợp lệ
+# - Kiểm tra status = 201
+# - Kiểm tra JSON trả về có batch_code + current_stock
+
+POST {{baseUrl}}/product-batches
+Content-Type: application/json
+Accept: application/json
+
+{
+  "product_id": 1,
+  "batch_code": "BATCH0-2026-01",
+  "manufacture_date": "2026-01-10",
+  "expiry_date": "2027-01-10",
+  "is_active": true
+}
+
+
+### =========================
+### [STORE] 2. Lỗi Validation - Trùng Batch Code
+### =========================
+# Gửi lại batch_code y hệt cho cùng product_id
+# Mong đợi: 422 (This batch code already exists for this product.)
+
+POST {{baseUrl}}/product-batches
+Content-Type: application/json
+Accept: application/json
+
+{
+  "product_id": 1,
+  "batch_code": "BATCH-2026-01",
+  "manufacture_date": "2026-02-01",
+  "expiry_date": "2027-02-01",
+  "is_active": true
+}
+
+
+### =========================
+### [STORE] 3. Lỗi Validation - Product Không Tồn Tại (FK)
+### =========================
+# product_id không tồn tại trong bảng products
+# Mong đợi: 422 (The selected product is invalid.)
+
+POST {{baseUrl}}/product-batches
+Content-Type: application/json
+Accept: application/json
+
+{
+  "product_id": 99999,
+  "batch_code": "BATCH-FAIL-01",
+  "manufacture_date": "2026-01-01",
+  "expiry_date": "2027-01-01"
+}
+
+
+### =========================
+### [STORE] 4. Lỗi Validation - Sai Logic Ngày
+### =========================
+# expiry_date < manufacture_date
+# Mong đợi: 422 (Expiry date must be after manufacture date.)
+
+POST {{baseUrl}}/product-batches
+Content-Type: application/json
+Accept: application/json
+
+{
+  "product_id": 1,
+  "batch_code": "BATCH-FAIL-02",
+  "manufacture_date": "2026-05-01",
+  "expiry_date": "2026-01-01"
+}
+
+
+### =========================
+### [STORE] 5. Lỗi Validation - Sai Định Dạng (Format)
+### =========================
+# batch_code sai regex
+# manufacture_date sai format
+# is_active sai kiểu
+
+POST {{baseUrl}}/product-batches
+Content-Type: application/json
+Accept: application/json
+
+{
+  "product_id": 1,
+  "batch_code": "batch@@@01",
+  "manufacture_date": "ngay-hom-nay",
+  "expiry_date": "2027-01-01",
+  "is_active": "yes"
+}
+
+
+### =========================
+### [STORE] 6. Lỗi Validation - Thiếu Field Bắt Buộc
+### =========================
+# Thiếu product_id, batch_code
+# Mong đợi: 422 (required fields)
+
+POST {{baseUrl}}/product-batches
+Content-Type: application/json
+Accept: application/json
+
+{
+  "manufacture_date": "2026-01-01",
+  "expiry_date": "2027-01-01"
+}

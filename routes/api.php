@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductBatchController;
 use App\Http\Controllers\Api\WarehouseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,7 @@ Route::apiResource('brands', BrandController::class);
 Route::apiResource('categories', CategoryController::class);
 Route::apiResource('products', ProductController::class);
 Route::apiResource('warehouses', WarehouseController::class);
+Route::apiResource('product-batches', ProductBatchController::class);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -31,4 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Category
 
     // Warehouse
+
+    // ProductBatch
 });

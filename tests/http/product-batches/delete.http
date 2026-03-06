@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:8000/api
+@token = 1|your_sanctum_token_here
+
+# Lưu ý: Thay đổi ID cho phù hợp với dữ liệu thực tế trong DB của bạn
+@batchIdWithStock = 1
+@batchIdWithHistory = 2
+@batchIdInOrder = 3
+@batchIdClean = 22
+
+### 1. [DELETE] Thất bại: Lô hàng còn tồn kho (422)
+# Kiểm tra logic: $productBatch->stocks()->exists()
+DELETE {{baseUrl}}/product-batches/{{batchIdWithStock}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### 2. [DELETE] Thất bại: Lô hàng có lịch sử giao dịch (422)
+# Kiểm tra logic: $productBatch->transactions()->exists()
+DELETE {{baseUrl}}/product-batches/{{batchIdWithHistory}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### 3. [DELETE] Thất bại: Lô hàng đã có trong đơn hàng (422)
+# Kiểm tra logic: $productBatch->orderItems()->exists()
+DELETE {{baseUrl}}/product-batches/{{batchIdInOrder}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### 4. [DELETE] Thành công: Lô hàng "sạch" hoàn toàn (200)
+# Trường hợp lô hàng vừa tạo nhầm, chưa nhập kho, chưa bán
+DELETE {{baseUrl}}/product-batches/{{batchIdClean}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### 5. [DELETE] Thất bại: Lô hàng không tồn tại (404)
+# Kiểm tra Route Model Binding của Laravel
+DELETE {{baseUrl}}/product-batches/999999
+Accept: application/json
+Authorization: Bearer {{token}}
