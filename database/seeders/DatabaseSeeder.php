@@ -23,16 +23,17 @@ class DatabaseSeeder extends Seeder
     //     ]);
     // }
     public function run(): void
-{
-    $this->call([
-        UserSeeder::class,
-        CategorySeeder::class,
-        BrandSeeder::class,
-        WarehouseSeeder::class,
-        ProductSeeder::class,
-        ProductBatchSeeder::class,
-        StockSeeder::class,
-        OrderSeeder::class, // Bao gồm cả OrderItems
-    ]);
-}
+    {
+        $this->call([
+            UserSeeder::class,
+            CategorySeeder::class,
+            BrandSeeder::class,
+            WarehouseSeeder::class,
+            ProductSeeder::class,
+            ProductBatchSeeder::class,
+            StockSeeder::class,
+            OrderSeeder::class, // Bao gồm cả OrderItems
+            InventoryTransactionSeeder::class,
+        ]);
+    }
 }

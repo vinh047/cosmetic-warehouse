@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:8000/api
+
+### 1. Lấy toàn bộ danh sách (Mặc định - Mới nhất lên đầu)
+GET {{baseUrl}}/inventory-transactions
+Accept: application/json
+
+### 2. Lọc theo Loại giao dịch (Chỉ xem phiếu XUẤT KHO)
+GET {{baseUrl}}/inventory-transactions?type=OUT
+Accept: application/json
+
+### 3. Lọc theo Kho cụ thể (Ví dụ: Kho ID = 1)
+GET {{baseUrl}}/inventory-transactions?warehouse_id=1
+Accept: application/json
+
+### 4. Lọc theo Lô hàng cụ thể (Để truy vết lịch sử của 1 lô mỹ phẩm)
+GET {{baseUrl}}/inventory-transactions?product_batch_id=1
+Accept: application/json
+
+### 5. Lọc theo Loại tham chiếu (Ví dụ: Giao dịch phát sinh từ Đơn hàng)
+GET {{baseUrl}}/inventory-transactions?reference_type=order
+Accept: application/json
+
+### 6. Lọc theo Khoảng thời gian (Ví dụ: Từ ngày 01/03 đến 07/03/2026)
+GET {{baseUrl}}/inventory-transactions?from_date=2026-03-01&to_date=2026-03-07
+Accept: application/json
+
+### 7. Sắp xếp dữ liệu (Ví dụ: Xếp theo số lượng 'quantity' tăng dần)
+GET {{baseUrl}}/inventory-transactions?sort=quantity&order=asc
+Accept: application/json
+
+### 8. Kết hợp nhiều bộ lọc (NÂNG CAO)
+# Ví dụ: Xem các phiếu NHẬP của KHO 1 trong tháng 3, sắp xếp theo ID giảm dần
+GET {{baseUrl}}/inventory-transactions?warehouse_id=1&type=IN&from_date=2026-03-01&sort=id&order=desc
+Accept: application/json
+
+### 9. Test phân trang (Trang 2, mỗi trang 5 bản ghi)
+GET {{baseUrl}}/inventory-transactions?per_page=5&page=2
+Accept: application/json

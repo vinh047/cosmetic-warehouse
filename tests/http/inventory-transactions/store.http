@@ -1,0 +1,43 @@
+@baseUrl = http://localhost:8000/api
+
+### [STORE] Nhập kho (Tăng số lượng tồn kho)
+POST {{baseUrl}}/inventory-transactions
+Accept: application/json
+Content-Type: application/json
+
+    {
+        "product_batch_id": 1,
+        "warehouse_id": 1,
+        "type": "IN",
+        "quantity": 100,
+        "reference_type": "purchase",
+        "reference_id": 10
+    }
+
+### [STORE] Xuất kho (Lỗi do xuất quá số lượng hiện có)
+POST {{baseUrl}}/inventory-transactions
+Accept: application/json
+Content-Type: application/json
+
+{
+    "product_batch_id": 1,
+    "warehouse_id": 1,
+    "type": "OUT",
+    "quantity": 999999,
+    "reference_type": "Sales Order",
+    "reference_id": 20
+}
+
+### [STORE] Điều chỉnh kho (Gán số lượng tồn kho bằng chính quantity này)
+POST {{baseUrl}}/inventory-transactions
+Accept: application/json
+Content-Type: application/json
+
+{
+    "product_batch_id": 1,
+    "warehouse_id": 1,
+    "type": "ADJUST",
+    "quantity": 50,
+    "reference_type": "Audit Result",
+    "reference_id": null
+}
