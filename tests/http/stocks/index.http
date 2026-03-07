@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:8000/api
+
+### 1. Lấy danh sách tồn kho mặc định (Phân trang 10 bản ghi)
+GET {{baseUrl}}/stocks
+Accept: application/json
+
+### 2. Lọc tồn kho theo một Kho cụ thể (Ví dụ: Kho ID = 1)
+GET {{baseUrl}}/stocks?warehouse_id=1
+Accept: application/json
+
+### 3. Lọc tất cả các lô hàng của một Sản phẩm (Ví dụ: Sản phẩm ID = 5)
+GET {{baseUrl}}/stocks?product_id=5
+Accept: application/json
+
+### 4. Lọc đích danh một Lô hàng cụ thể (Sử dụng khi cần truy vết lô lỗi)
+GET {{baseUrl}}/stocks?product_batch_id=12
+Accept: application/json
+
+### 5. Cảnh báo hàng sắp hết (Mặc định ngưỡng <= 10)
+GET {{baseUrl}}/stocks?low_stock=true&threshold=30
+Accept: application/json
+
+### 6. Cảnh báo hàng cực kỳ ít (Ngưỡng tùy chỉnh <= 3)
+GET {{baseUrl}}/stocks?low_stock=true&threshold=3
+Accept: application/json
+
+### 7. Cảnh báo hàng sắp hết hạn (Mặc định trong 30 ngày tới)
+GET {{baseUrl}}/stocks?expiring_soon=true
+Accept: application/json
+
+### 8. Lọc hàng cận hạn trong thời gian dài (Ví dụ: 90 ngày để xả hàng hè)
+GET {{baseUrl}}/stocks?expiring_soon=true&days=350
+Accept: application/json
+
+### 9. Kết hợp nâng cao: Tìm hàng sắp hết hạn của Sản phẩm 5 tại Kho 1
+GET {{baseUrl}}/stocks?warehouse_id=1&product_id=5&expiring_soon=true&days=30
+Accept: application/json
+
+### 10. Sắp xếp theo số lượng tăng dần (Hàng ít nhất lên đầu)
+GET {{baseUrl}}/stocks?sort=quantity&order=desc
+Accept: application/json

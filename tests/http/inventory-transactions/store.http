@@ -24,7 +24,7 @@ Content-Type: application/json
     "warehouse_id": 1,
     "type": "OUT",
     "quantity": 999999,
-    "reference_type": "Sales Order",
+    "reference_type": "order",
     "reference_id": 20
 }
 

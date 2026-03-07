@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:8000/api
+
+### [SHOW] Xem chi tiết một giao dịch kho cụ thể theo ID
+GET {{baseUrl}}/stocks/1
+Accept: application/json
+Content-Type: application/json

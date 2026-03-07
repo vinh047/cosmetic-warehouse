@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\InventoryTransactionController;
 use App\Http\Controllers\Api\ProductBatchController;
+use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\WarehouseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,7 @@ Route::apiResource('products', ProductController::class);
 Route::apiResource('warehouses', WarehouseController::class);
 Route::apiResource('product-batches', ProductBatchController::class);
 Route::apiResource('inventory-transactions', InventoryTransactionController::class);
+Route::apiResource('stocks', StockController::class);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
