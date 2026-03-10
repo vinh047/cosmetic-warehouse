@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
@@ -10,6 +11,7 @@ use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rules\Enum;
 
 class OrderController extends Controller
 {
@@ -27,7 +29,7 @@ class OrderController extends Controller
         $orders = Order::with('creator')
             ->filter($request->all())
             ->paginate($request->input('per_page', 10));
-            
+
         return OrderResource::collection($orders);
     }
 
@@ -71,19 +73,31 @@ class OrderController extends Controller
         return new OrderResource($order);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function updateStatus(Request $request, Order $order)
     {
-        //
-    }
+        // 1. Validate cực chặt: Trạng thái truyền lên phải nằm trong Enum OrderStatus
+        $validated = $request->validate([
+            'status' => ['required', new Enum(OrderStatus::class)]
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        try {
+            $userId = 1; // Giả lập User ID đang thao tác
+
+            // 2. Gọi Service xử lý nghiệp vụ chuyển trạng thái
+            $updatedOrder = $this->orderService->updateStatus($order, $validated['status'], $userId);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Order status updated to {$validated['status']}.",
+                'data'    => new OrderResource($updatedOrder)
+            ]);
+        } catch (Exception $e) {
+            Log::error("Order Status Update Failed (Order ID: {$order->id}): " . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400); // Trả về 400 Bad Request nếu chuyển trạng thái sai quy tắc
+        }
     }
 }

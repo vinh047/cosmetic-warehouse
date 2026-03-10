@@ -3,7 +3,7 @@
 @token = 1|your_sanctum_token_here_xxxxxx
 
 ### 1. Lấy danh sách Mặc định (Trang 1, 10 dòng/trang)
-GET {{baseUrl}}/orders
+GET {{baseUrl}}/orders/10
 Accept: application/json
 Authorization: Bearer {{token}}
 

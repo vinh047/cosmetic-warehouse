@@ -3,8 +3,10 @@
 
 namespace App\Services;
 
+use App\Enums\InventoryReferenceType;
 use App\Enums\OrderChannel;
 use App\Enums\OrderStatus;
+use App\Models\InventoryTransaction;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Stock;
@@ -88,7 +90,7 @@ class OrderService
                         $totalPrice += ($stock->productBatch->product->price * $takeQty);
                         $qtyNeeded -= $takeQty;
                     }
-                    
+
                     if ($qtyNeeded > 0) {
                         $productName = Product::find($productId)->name ?? "ID $productId";
                         throw new Exception("Checkout failed: The inventory for product {$productName} changed while processing your order. Please try again.");
@@ -123,5 +125,84 @@ class OrderService
             'quantity'         => $quantity,
             'price'            => $stock->productBatch->product->price,
         ]);
+    }
+
+    /**
+     * Cập nhật trạng thái đơn hàng và xử lý các nghiệp vụ liên quan (Hoàn kho)
+     *
+     * @param Order $order
+     * @param string $newStatus
+     * @param int $userId
+     * @return Order
+     * @throws Exception
+     */
+    public function updateStatus(Order $order, string $newStatus, int $userId): Order
+    {
+        if (in_array($order->status->value, [OrderStatus::CANCELLED->value, OrderStatus::COMPLETED->value])) {
+            throw new Exception("Cannot change the status of a completed or cancelled order.");
+        }
+
+        if ($order->status->value === $newStatus) {
+            return $order;
+        }
+
+        return DB::transaction(function () use ($order, $newStatus, $userId) {
+
+            // Cập nhật trạng thái mới
+            $order->update(['status' => $newStatus]);
+
+            if ($newStatus === OrderStatus::CANCELLED->value) {
+                $this->handleOrderCancellation($order, $userId);
+            }
+
+            // update*
+            // Nếu là COMPLETED thì có thể kích hoạt luồng Gửi Email Cảm ơn, Cộng điểm tích lũy... 
+
+            return $order->refresh();
+        });
+    }
+
+    /**
+     *  Xử lý Hoàn trả Tồn kho khi Đơn bị Hủy
+     */
+    private function handleOrderCancellation(Order $order, int $userId): void
+    {
+        $order->loadMissing('items');
+
+        foreach ($order->items as $item) {
+
+            // Lấy alias chuẩn từ cấu hình MorphMap ('order')
+            $morphType = $order->getMorphClass();
+
+            // 1. TRUY VẾT BIÊN LAI XUẤT KHO
+            $outTransaction = InventoryTransaction::where('reference_type', $morphType)
+                ->where('reference_id', $order->id)
+                ->where('product_batch_id', $item->product_batch_id)
+                ->where('type', 'OUT')
+                ->first();
+
+            if (!$outTransaction) {
+                // Nếu không tìm thấy, chứng tỏ lúc tạo đơn bị lỗi không trừ kho, hoặc dữ liệu rác
+                throw new Exception("Initial stock deduction record not found for product batch ID {$item->product_batch_id}.");
+            }
+
+            $warehouseId = $outTransaction->warehouse_id;
+
+            // Cộng trả lại Tồn kho
+            Stock::where('warehouse_id', $warehouseId)
+                ->where('product_batch_id', $item->product_batch_id)
+                ->increment('quantity', $item->quantity);
+
+            // Ghi log Nhập kho (Hoàn trả)
+            InventoryTransaction::create([
+                'user_id'          => $userId,
+                'product_batch_id' => $item->product_batch_id,
+                'warehouse_id'     => $warehouseId,
+                'type'             => 'IN',
+                'quantity'         => $item->quantity,
+                'reference_type'   => Order::class,
+                'reference_id'     => $order->id,
+            ]);
+        }
     }
 }

@@ -1,0 +1,61 @@
+@baseUrl = http://localhost:8000/api
+@token = 1|your_sanctum_token_here_xxxxxx
+@orderId = 12
+
+### 1. [Thành công] Chuyển đơn sang trạng thái Đang xử lý (Processing)
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "status": "processing"
+}
+
+
+### 2. [Thành công & Kích hoạt Hoàn Kho] Hủy Đơn Hàng (Cancelled)
+# Cú PATCH này sẽ gọi trực tiếp vào luồng cộng dồn bảng `stocks` và ghi log `inventory_transactions`
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "status": "cancelled"
+}
+
+
+### 3. [Lỗi Logic 400] Cố tình đổi trạng thái khi đơn ĐÃ HỦY
+# Chạy Request số 2 xong, bạn chạy tiếp Request này.
+# Hệ thống phải chặn lại và văng lỗi "Không thể thay đổi trạng thái..." từ hàm Exception của Service
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "status": "pending"
+}
+
+
+### 4. [Thành công] Chuyển đơn sang trạng thái Hoàn thành (Completed)
+# Lưu ý: Nhớ đổi @orderId ở trên cùng thành một ID đơn hàng khác (đang pending/processing) để test nhé
+PATCH {{baseUrl}}/orders/10/status
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "status": "completed"
+}
+
+
+### 5. [Lỗi Validate 422] Truyền lên một Status tào lao không có trong Enum
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "status": "dang_giao_hang_cho_khach"
+}

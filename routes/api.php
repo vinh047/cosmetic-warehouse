@@ -22,7 +22,15 @@ Route::apiResource('warehouses', WarehouseController::class);
 Route::apiResource('product-batches', ProductBatchController::class);
 Route::apiResource('inventory-transactions', InventoryTransactionController::class);
 Route::apiResource('stocks', StockController::class);
-Route::apiResource('orders', OrderController::class);
+
+Route::prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index']);
+    Route::post('/', [OrderController::class, 'store']);
+    Route::get('/{order}', [OrderController::class, 'show']);
+
+    // Đích đến của chúng ta đây: Dùng PATCH để cập nhật trạng thái
+    Route::patch('/{order}/status', [OrderController::class, 'updateStatus']);
+});
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
