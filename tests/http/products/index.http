@@ -29,7 +29,7 @@ Accept: application/json
 
 ### [INDEX] 6. Phân trang (Pagination)
 # Test lấy 5 sản phẩm mỗi trang, và đang xem trang số 2
-GET {{baseUrl}}/products?per-page=5&page=2
+GET {{baseUrl}}/products?per_page=5&page=2
 Accept: application/json
 
 ### [INDEX] 7. Test trường hợp Không tìm thấy (Empty State)
