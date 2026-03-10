@@ -22,8 +22,8 @@ class WarehouseController extends Controller
             // 2. Tính tổng cột quantity (-> stocks_sum_quantity)
             ->withSum('stocks', 'quantity')
 
-            ->filter($request)
-            ->paginate($request->get('per-page', 10));
+            ->filter($request->all())
+            ->paginate($request->input('per_page', 10));
 
         return WarehouseResource::collection($warehouses);
     }

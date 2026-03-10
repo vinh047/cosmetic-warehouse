@@ -30,7 +30,7 @@ Accept: application/json
 
 ### [INDEX] 6. Phân trang (Pagination)
 # Test: Lấy 5 kho mỗi trang, và xem trang số 2
-GET {{baseUrl}}/warehouses?per-page=1&page=2
+GET {{baseUrl}}/warehouses?per_page=1&page=2
 Accept: application/json
 
 ### [INDEX] 7. "Combo" Tổng hợp (Real-world scenario)

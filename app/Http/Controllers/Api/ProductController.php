@@ -17,8 +17,8 @@ class ProductController extends Controller
     {
         $products = Product::query()
             ->with(['brand:id,name', 'category:id,name'])
-            ->filter($request)
-            ->paginate($request->get('per-page', 10));
+            ->filter($request->all())
+            ->paginate($request->input('per_page', 10));
 
         return ProductResource::collection($products);
     }

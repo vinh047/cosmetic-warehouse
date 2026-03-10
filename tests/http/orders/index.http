@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:8000/api
+# Đổi token này thành token thật của bạn sau khi login bằng Sanctum
+@token = 1|your_sanctum_token_here_xxxxxx
+
+### 1. Lấy danh sách Mặc định (Trang 1, 10 dòng/trang)
+GET {{baseUrl}}/orders
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 2. Tìm theo Mã đơn hàng (Gõ một phần của mã)
+# Ví dụ: Gõ "260308" để tìm đơn ORD260308ABCD
+GET {{baseUrl}}/orders?order_code=5
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 3. Tìm theo Tên khách hàng (Khớp tương đối - Like)
+# Ví dụ: Tìm tất cả khách hàng có tên "Nguyễn"
+GET {{baseUrl}}/orders?customer_name=Nguyễn
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 4. Lọc theo Trạng thái (Status)
+# Tùy thuộc vào Enum OrderStatus của bạn (VD: pending, completed, cancelled)
+GET {{baseUrl}}/orders?status=pending
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 5. Lọc theo Kênh bán (Channel)
+# Tùy thuộc vào Enum OrderChannel của bạn (VD: online, offline)
+GET {{baseUrl}}/orders?channel=online
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 6. Lọc theo Dải thời gian (Từ ngày A đến ngày B)
+# Chú ý: Format ngày chuẩn là YYYY-MM-DD
+GET {{baseUrl}}/orders?start_date=2026-03-08&end_date=2026-03-9
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 7. Lọc thời gian "Mở một đầu" (Chỉ lấy đơn từ đầu tháng đến nay)
+GET {{baseUrl}}/orders?start_date=2026-03-08
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 8. Sắp xếp đơn hàng (Sort)
+# Các cột cho phép: id, order_code, total_price, created_at
+# Ví dụ: Lọc đơn có tổng tiền cao nhất đưa lên đầu
+GET {{baseUrl}}/orders?sort=total_price&order=desc
+Accept: application/json
+Authorization: Bearer {{token}}
+
+
+### 9. COMBAT: Kết hợp tất cả Filter + Sort + Phân trang
+# Tìm khách tên "Anh", mua kênh "offline", sắp xếp theo ngày tạo cũ nhất, lấy 5 dòng/trang
+GET {{baseUrl}}/orders?customer_name=Anh&channel=offline&sort=created_at&order=asc&per_page=5
+Accept: application/json
+Authorization: Bearer {{token}}

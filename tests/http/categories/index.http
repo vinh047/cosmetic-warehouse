@@ -24,12 +24,12 @@ Accept: application/json
 
 ### [INDEX] 6. Tùy chỉnh phân trang (Pagination)
 # Test lấy 20 bản ghi mỗi trang, đang xem trang số 2
-GET {{baseUrl}}/categories?per-page=1&page=3
+GET {{baseUrl}}/categories?per_page=1&page=3
 Accept: application/json
 
 ### [INDEX] 7. Combo "Hủy diệt" (Kết hợp tất cả)
 # Tìm "Son", chỉ lấy Active, sắp xếp cũ nhất lên đầu, lấy 5 cái
-GET {{baseUrl}}/categories?search=lap&active=true&sort=created_at&order=asc&per-page=5
+GET {{baseUrl}}/categories?search=lap&active=true&sort=created_at&order=asc&per_page=5
 Accept: application/json
 
 ### [INDEX] 8. Test bảo mật Sort (Cột không tồn tại)

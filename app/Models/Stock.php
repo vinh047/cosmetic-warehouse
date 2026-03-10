@@ -44,34 +44,41 @@ class Stock extends Model
         return $query->when($productBatchId, fn($q) => $q->where('product_batch_id', $productBatchId));
     }
 
-    public function scopeLowStock($query, $threshold = null)
+    public function scopeLowStock($query, $isLowStock = null, $threshold = null)
     {
-        $limit = $threshold ?? 10;
-        return $query->where('quantity', '<=', $limit);
-    }
-
-    public function scopeExpiringSoon($query, $days = null)
-    {
-        $limitDays = (int) ($days ?? 30);
-
-        return $query->whereHas('productBatch', function ($q) use ($limitDays) {
-            $q->where('expiry_date', '<=', now()->addDays($limitDays))
-                ->where('expiry_date', '>=', now());
+        return $query->when(!is_null($isLowStock), function ($q) use ($isLowStock, $threshold) {
+            if (filter_var($isLowStock, FILTER_VALIDATE_BOOLEAN)) {
+                $limit = $threshold ?? 10;
+                return $q->where('quantity', '<=', $limit);
+            }
         });
     }
 
-    public function scopeFilter($query, $request)
+    public function scopeExpiringSoon($query, $isExpiringSoon = null, $days = null)
+    {
+        return $query->when(!is_null($isExpiringSoon), function ($q) use ($isExpiringSoon, $days) {
+            if (filter_var($isExpiringSoon, FILTER_VALIDATE_BOOLEAN)) {
+                $limitDays = (int) ($days ?? 30);
+                return $q->whereHas('productBatch', function ($subQ) use ($limitDays) {
+                    $subQ->where('expiry_date', '<=', now()->addDays($limitDays))
+                        ->where('expiry_date', '>=', now());
+                });
+            }
+        });
+    }
+
+    public function scopeFilter($query, array $filters)
     {
         return $query
-            ->warehouseId($request->warehouse_id)
-            ->productId($request->product_id)
-            ->productBatchId($request->product_batch_id)
-            ->when($request->filled('low_stock'), function ($q) use ($request) {
-                return $q->lowStock($request->get('threshold'));
-            })
-            ->when($request->filled('expiring_soon'), function ($q) use ($request) {
-                return $q->expiringSoon($request->get('days'));
-            })
-            ->sort($request, ['id', 'quantity', 'updated_at']);
+            ->warehouseId($filters['warehouse_id'] ?? null)
+            ->productId($filters['product_id'] ?? null)
+            ->productBatchId($filters['product_batch_id'] ?? null)
+            ->lowStock($filters['low_stock'] ?? null, $filters['threshold'] ?? null)
+            ->expiringSoon($filters['expiring_soon'] ?? null, $filters['days'] ?? null)
+            ->sort(
+                $filters['sort'] ?? null,
+                $filters['order'] ?? 'desc',
+                ['id', 'quantity', 'updated_at']
+            );
     }
 }

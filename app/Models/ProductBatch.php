@@ -46,72 +46,59 @@ class ProductBatch extends Model
 
     public function scopeProduct($query, $productId)
     {
-        if ($productId) {
-            $query->where('product_id', $productId);
-        }
-        return $query;
+        return $query->when($productId, fn($q) => $q->where('product_id', $productId));
     }
 
     public function scopeExpiryFrom($query, $expiryFrom)
     {
-        if ($expiryFrom) {
-            $query->whereDate('expiry_date', '>=', $expiryFrom);
-        }
-        return $query;
+        return $query->when($expiryFrom, fn($q) => $q->whereDate('expiry_date', '>=', $expiryFrom));
     }
 
     public function scopeExpiryTo($query, $expiryTo)
     {
-        if ($expiryTo) {
-            $query->whereDate('expiry_date', '<=', $expiryTo);
-        }
-        return $query;
+        return $query->when($expiryTo, fn($q) => $q->whereDate('expiry_date', '<=', $expiryTo));
     }
 
     public function scopeExpired($query, $isExpired)
     {
-        if (!is_null($isExpired)) {
-            return $query->where('expiry_date', $isExpired ? '<' : '>=', now());
-        }
-        return $query;
+        return $query->when(!is_null($isExpired), function ($q) use ($isExpired) {
+            $expiredBool = filter_var($isExpired, FILTER_VALIDATE_BOOLEAN);
+            return $q->whereDate('expiry_date', $expiredBool ? '<' : '>=', now());
+        });
     }
 
     public function scopeStock($query, $hasStock)
     {
-        if (!is_null($hasStock)) {
-            $query->whereHas('stocks', function ($q) use ($hasStock) {
-                return $hasStock
-                    ? $q->where('quantity', '>', 0)
-                    : $q->where('quantity', '<=', 0);
+        return $query->when(!is_null($hasStock), function ($q) use ($hasStock) {
+            $hasStockBool = filter_var($hasStock, FILTER_VALIDATE_BOOLEAN);
+
+            return $q->whereHas('stocks', function ($q2) use ($hasStockBool) {
+                return $hasStockBool
+                    ? $q2->where('quantity', '>', 0)
+                    : $q2->where('quantity', '<=', 0);
             });
-        }
-        return $query;
+        });
     }
 
     public function scopeSearch($query, $keyword)
     {
-        if ($keyword) {
-            $query->where('batch_code', 'like', "%{$keyword}%");
-        }
-        return $query;
+        return $query->when($keyword, fn($q) => $q->where('batch_code', 'like', "%{$keyword}%"));
     }
 
-    public function scopeFilter($query, $request)
+    public function scopeFilter($query, array $filters)
     {
         return $query
-            ->when($request->has('active'), function ($q) use ($request) {
-                $q->byStatus($request->boolean('active'));
-            })
-            ->sort($request, ['batch_code', 'manufacture_date', 'expiry_date', 'is_active'])
-            ->search($request->search)
-            ->product($request->product_id)
-            ->expiryFrom($request->expiry_from)
-            ->expiryTo($request->expiry_to)
-            ->when($request->has('is_expired'), function ($q) use ($request) {
-                $q->expired($request->boolean('is_expired'));
-            })
-            ->when($request->has('has_stock'), function ($q) use ($request) {
-                $q->stock($request->boolean('has_stock'));
-            });
+            ->filterActive($filters['active'] ?? null)
+            ->search($filters['search'] ?? null)
+            ->product($filters['product_id'] ?? null)
+            ->expiryFrom($filters['expiry_from'] ?? null)
+            ->expiryTo($filters['expiry_to'] ?? null)
+            ->expired($filters['is_expired'] ?? null)
+            ->stock($filters['has_stock'] ?? null)
+            ->sort(
+                $filters['sort'] ?? null,
+                $filters['order'] ?? 'desc',
+                ['id', 'batch_code', 'manufacture_date', 'expiry_date', 'is_active']
+            );
     }
 }

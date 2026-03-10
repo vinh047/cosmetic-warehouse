@@ -127,7 +127,7 @@ Accept: application/json
 ### =========================
 # Test: 5 record mỗi trang, trang số 2
 
-GET {{baseUrl}}/product-batches?per-page=5&page=4
+GET {{baseUrl}}/product-batches?per_page=5&page=4
 Authorization: Bearer {{token}}
 Accept: application/json
 
@@ -144,6 +144,6 @@ Accept: application/json
 # - Sort mới nhất
 # - Phân trang
 
-GET {{baseUrl}}/product-batches?product_id=2&search=l&is_expired=false&has_stock=true&active=1&sort=-expiry_date&per-page=10&page=1
+GET {{baseUrl}}/product-batches?product_id=2&search=l&is_expired=false&has_stock=true&active=1&sort=-expiry_date&per_page=10&page=1
 Authorization: Bearer {{token}}
 Accept: application/json

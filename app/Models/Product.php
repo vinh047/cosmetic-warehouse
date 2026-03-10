@@ -36,39 +36,36 @@ class Product extends Model
 
     public function scopeBrand($query, $brandId)
     {
-        if ($brandId) {
-            $query->where('brand_id', $brandId);
-        }
+        return $query->when($brandId, fn($q) => $q->where('brand_id', $brandId));
     }
 
     public function scopeCategory($query, $categoryId)
     {
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
-        }
+        return $query->when($categoryId, fn($q) => $q->where('category_id', $categoryId));
     }
 
     // Name or sku
     public function scopeSearch($query, $keyword)
     {
-        if ($keyword) {
-            $query->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%$keyword%")
-                    ->orWhere('sku', 'like', "%$keyword%");
+        return $query->when($keyword, function ($q) use ($keyword) {
+            $q->where(function ($subQ) use ($keyword) {
+                $subQ->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('sku', 'like', "%{$keyword}%");
             });
-        }
-        return $query;
+        });
     }
 
-    public function scopeFilter($query, $request)
+    public function scopeFilter($query, array $filters)
     {
         return $query
-            ->when($request->has('active'), function ($q) use ($request) {
-                $q->byStatus($request->boolean('active'));
-            })
-            ->brand($request->brand_id)
-            ->category($request->category_id)
-            ->search($request->search)
-            ->sort($request, ['id', 'name', 'sku', 'price', 'is_active']);
+            ->filterActive($filters['active'] ?? null)
+            ->brand($filters['brand_id'] ?? null)
+            ->category($filters['category_id'] ?? null)
+            ->search($filters['search'] ?? null)
+            ->sort(
+                $filters['sort'] ?? null,
+                $filters['order'] ?? 'desc',
+                ['id', 'name', 'sku', 'price', 'is_active']
+            );
     }
 }

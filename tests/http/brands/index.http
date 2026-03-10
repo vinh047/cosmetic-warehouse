@@ -1,14 +1,16 @@
+@baseUrl = http://localhost:8000/api
+
 ### 1. [BASIC] Lấy danh sách mặc định (Page 1, 10 bản ghi/trang)
 GET {{baseUrl}}/brands
 Accept: application/json
 
 ### 2. [PAGINATION] Lấy danh sách với số lượng bản ghi tùy chỉnh (Limit)
 # Trường hợp Frontend muốn hiển thị ít hoặc nhiều bản ghi hơn trên 1 trang
-GET {{baseUrl}}/brands?per-page=2
+GET {{baseUrl}}/brands?per_page=2
 Accept: application/json
 
 ### 3. [PAGINATION] Lấy dữ liệu ở trang cụ thể (Trang 2)
-GET {{baseUrl}}/brands?per-page=1&page=3
+GET {{baseUrl}}/brands?per_page=1&page=2
 Accept: application/json
 
 ### 4. [SEARCH] Tìm kiếm thương hiệu theo từ khóa (Tên hoặc Quốc gia)
@@ -37,5 +39,5 @@ Accept: application/json
 
 # ### 9. [ADVANCED] Lấy bao gồm cả các thương hiệu đã xóa (Soft Deleted)
 # # Nếu bạn đã cài đặt logic withTrashed() trong Controller
-# GET {{baseUrl}}/brands?trashed=1
+# GET {{baseUrl}}/brands?trashed=0
 # Accept: application/json

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Enums\InventoryReferenceType;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Relation::enforceMorphMap([
+            InventoryReferenceType::ORDER->value      => \App\Models\Order::class,
+        ]);
     }
 }

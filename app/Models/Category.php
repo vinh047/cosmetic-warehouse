@@ -24,18 +24,22 @@ class Category extends Model
         return $this->is_active;
     }
 
-    public function scopeNameSearch($query, $keyword)
+    public function scopeSearch($query, $keyword)
     {
-        return $query->where('name', 'like', "%{$keyword}%");
+        return $query->when($keyword, fn($q) => $q->where('name', 'like', "%{$keyword}%"));
     }
 
-    public function scopeFilter($query, $request)
+    public function scopeFilter($query, array $filters)
     {
         return $query
-            ->when($request->has('active'), function ($q) use ($request) {
-                $q->byStatus($request->boolean('active'));
-            })
-            ->nameSearch($request->search)
-            ->sort($request, ['id', 'name', 'created_at', 'is_active']);
+            ->filterActive($filters['active'] ?? null)
+
+            ->search($filters['search'] ?? null)
+
+            ->sort(
+                $filters['sort'] ?? null,
+                $filters['order'] ?? 'desc',
+                ['id', 'name', 'created_at', 'is_active']
+            );
     }
 }

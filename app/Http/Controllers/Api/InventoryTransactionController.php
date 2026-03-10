@@ -19,8 +19,9 @@ class InventoryTransactionController extends Controller
     public function index(Request $request)
     {
         $transactions = InventoryTransaction::with(['user', 'warehouse', 'productBatch.product'])
-            ->filter($request)
-            ->paginate(15);
+            ->filter($request->all())
+            // update*
+            ->paginate($request->input('per_page', 10));
 
         return InventoryTransactionResource::collection($transactions);
     }

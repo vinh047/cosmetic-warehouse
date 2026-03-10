@@ -17,8 +17,8 @@ class CategoryController extends Controller
     {
         $categories = Category::query()
             ->withCount('products')
-            ->filter($request)
-            ->paginate($request->get('per-page', 10));
+            ->filter($request->all())
+            ->paginate($request->input('per_page', 10));
 
         return CategoryResource::collection($categories);
     }

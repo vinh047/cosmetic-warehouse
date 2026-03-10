@@ -1,0 +1,95 @@
+### Cấu hình biến môi trường
+@baseUrl = http://localhost:8000/api
+@token = 1|your_sanctum_token_here_xxxxxx
+
+# =========================================================
+# KỊCH BẢN 1: TẠO ĐƠN OFFLINE (Tại quầy) - THÀNH CÔNG
+# =========================================================
+###
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "customer_name": "Nguyễn Văn A (Khách lẻ)",
+    "channel": "offline",
+    "warehouse_id": 1,
+    "items": [
+        {
+            "product_batch_id": 1, 
+            "quantity": 2
+        },
+        {
+            "product_batch_id": 2, 
+            "quantity": 1
+        }
+    ]
+}
+
+
+# =========================================================
+# KỊCH BẢN 2: TẠO ĐƠN ONLINE (Web/App) - THÀNH CÔNG
+# - Không cần truyền warehouse_id
+# - Truyền product_id để Backend tự dùng FEFO tìm lô và kho
+# =========================================================
+###
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "customer_name": "Trần Thị B (Khách Web)",
+    "channel": "online",
+    "items": [
+        {
+            "product_id": 3, 
+            "quantity": 4
+        }
+    ]
+}
+
+
+# =========================================================
+# KỊCH BẢN 3: TEST VALIDATION ERROR (Lỗi 422)
+# - Thiếu customer_name
+# - Kênh offline nhưng cố tình KHÔNG gửi warehouse_id
+# =========================================================
+###
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "channel": "offline",
+    "items": [
+        {
+            "product_batch_id": 1, 
+            "quantity": 1
+        }
+    ]
+}
+
+
+# =========================================================
+# KỊCH BẢN 4: TEST NGHIỆP VỤ - HẾT HÀNG (Lỗi 400 từ Service)
+# - Cố tình đặt số lượng cực lớn để trigger Exception
+# =========================================================
+###
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+    "customer_name": "Khách Test Lỗi",
+    "channel": "online",
+    "items": [
+        {
+            "product_id": 1, 
+            "quantity": 999999 
+        }
+    ]
+}

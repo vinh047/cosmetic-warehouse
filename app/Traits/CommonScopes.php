@@ -19,11 +19,19 @@ trait CommonScopes
         return $isActive ? $query->active() : $query->inactive();
     }
 
-    public function scopeSort($query, $request, array $allowedColumns = [])
+    public function scopeFilterActive($query, $activeValue = null)
     {
-        $sortColumn = $request->get('sort');
-        $sortOrder = $request->get('order', 'desc');
+        if (is_null($activeValue)) {
+            return $query;
+        }
 
+        $isActive = filter_var($activeValue, FILTER_VALIDATE_BOOLEAN);
+
+        return $this->scopeByStatus($query, $isActive);
+    }
+
+    public function scopeSort($query, $sortColumn = null, $sortOrder = 'desc', array $allowedColumns = [])
+    {
         if (empty($sortColumn)) {
             return $query->latest();
         }

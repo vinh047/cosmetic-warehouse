@@ -36,60 +36,55 @@ class InventoryTransaction extends Model
 
     public function scopeType($query, $type)
     {
-        if ($type)
-            return $query->where('type', $type);
+        return $query->when($type, fn($q) => $q->where('type', $type));
     }
 
     public function scopeWarehouseId($query, $warehouseId)
     {
-        if ($warehouseId)
-            return $query->where('warehouse_id', $warehouseId);
+        return $query->when($warehouseId, fn($q) => $q->where('warehouse_id', $warehouseId));
     }
 
     public function scopeProductBatchId($query, $productBatchId)
     {
-        if ($productBatchId)
-            return $query->where('product_batch_id', $productBatchId);
+        return $query->when($productBatchId, fn($q) => $q->where('product_batch_id', $productBatchId));
     }
 
     public function scopeReferenceType($query, $referenceType)
     {
-        if ($referenceType)
-            return $query->where('reference_type', $referenceType);
+        return $query->when($referenceType, fn($q) => $q->where('reference_type', $referenceType));
     }
 
     public function scopeFromDate($query, $date)
     {
-        if ($date) {
-            return $query->whereDate('created_at', '>=', $date);
-        }
+        return $query->when($date, fn($q) => $q->whereDate('created_at', '>=', $date));
     }
 
     public function scopeToDate($query, $date)
     {
-        if ($date) {
-            return $query->whereDate('created_at', '<=', $date);
-        }
+        return $query->when($date, fn($q) => $q->whereDate('created_at', '<=', $date));
     }
 
     public function scopeUserId($query, $userId)
     {
-        if ($userId)
-            return $query->where('user_id', $userId);
+        return $query->when($userId, fn($q) => $q->where('user_id', $userId));
     }
 
     // Trong Model InventoryTransaction
 
-    public function scopeFilter($query, $request)
+    public function scopeFilter($query, array $filters)
     {
         return $query
-            ->type($request->type)
-            ->warehouseId($request->warehouse_id)
-            ->productBatchId($request->product_batch_id)
-            ->referenceType($request->reference_type)
-            ->userId($request->user_id)
-            ->fromDate($request->from_date)
-            ->toDate($request->to_date)
-            ->sort($request, ['id', 'type', 'quantity', 'created_at']);
+            ->type($filters['type'] ?? null)
+            ->warehouseId($filters['warehouse_id'] ?? null)
+            ->productBatchId($filters['product_batch_id'] ?? null)
+            ->referenceType($filters['reference_type'] ?? null)
+            ->userId($filters['user_id'] ?? null)
+            ->fromDate($filters['from_date'] ?? null)
+            ->toDate($filters['to_date'] ?? null)
+            ->sort(
+                $filters['sort'] ?? null,
+                $filters['order'] ?? 'desc',
+                ['id', 'type', 'quantity', 'created_at']
+            );
     }
 }

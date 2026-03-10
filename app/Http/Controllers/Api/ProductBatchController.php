@@ -17,8 +17,8 @@ class ProductBatchController extends Controller
     {
         $productBatches = ProductBatch::query()
             ->withSum('stocks', 'quantity')
-            ->filter($request)
-            ->paginate($request->get('per-page', 10));
+            ->filter($request->all())
+            ->paginate($request->input('per_page', 10));
         return ProductBatchResource::collection($productBatches);
     }
 

@@ -31,22 +31,25 @@ class Brand extends Model
 
     public function scopeSearch($query, $keyword)
     {
-        if ($keyword) {
-            $query->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")
+        return $query->when($keyword, function ($q) use ($keyword) {
+            $q->where(function ($subQ) use ($keyword) {
+                $subQ->where('name', 'like', "%{$keyword}%")
                     ->orWhere('country', 'like', "%{$keyword}%");
             });
-        }
-        return $query;
+        });
     }
 
-    public function scopeFilter($query, $request)
+    public function scopeFilter($query, array $filters)
     {
         return $query
-            ->when($request->has('active'), function ($q) use ($request) {
-                $q->byStatus($request->boolean('active'));
-            })
-            ->search($request->search)
-            ->sort($request, ['id', 'name', 'country', 'created_at', 'is_active']);
+            ->filterActive($filters['active'] ?? null)
+
+            ->search($filters['search'] ?? null)
+
+            ->sort(
+                $filters['sort'] ?? null,
+                $filters['order'] ?? 'desc',
+                ['id', 'name', 'country', 'created_at', 'is_active']
+            );
     }
 }

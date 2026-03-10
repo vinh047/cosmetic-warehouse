@@ -15,8 +15,8 @@ class StockController extends Controller
     public function index(Request $request)
     {
         $stocks = Stock::with(['warehouse', 'productBatch'])
-            ->filter($request)
-            ->paginate(10);
+            ->filter($request->all())
+            ->paginate($request->input('per_page', 10));
 
         return StockResource::collection($stocks);
     }
