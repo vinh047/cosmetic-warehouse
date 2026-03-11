@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\InventoryReferenceType;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Relation::enforceMorphMap([
             InventoryReferenceType::ORDER->value      => \App\Models\Order::class,
+            'user'  => User::class,
         ]);
     }
 }

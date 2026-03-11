@@ -62,6 +62,7 @@ class Product extends Model
             ->brand($filters['brand_id'] ?? null)
             ->category($filters['category_id'] ?? null)
             ->search($filters['search'] ?? null)
+            ->filterTrashed($filters['trashed'] ?? null)
             ->sort(
                 $filters['sort'] ?? null,
                 $filters['order'] ?? 'desc',

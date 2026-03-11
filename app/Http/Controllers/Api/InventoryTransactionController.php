@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\InventoryTransactionRequest;
+use App\Http\Requests\StoreInventoryTransactionRequest;
 use App\Http\Resources\InventoryTransactionResource;
 use App\Models\InventoryTransaction;
 use App\Models\Stock;
@@ -13,6 +13,11 @@ use Illuminate\Validation\ValidationException;
 
 class InventoryTransactionController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(InventoryTransaction::class, 'inventory_transaction');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -29,7 +34,7 @@ class InventoryTransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(InventoryTransactionRequest $request)
+    public function store(StoreInventoryTransactionRequest $request)
     {
         $data = $request->validated();
 

@@ -2,6 +2,7 @@
 POST {{baseUrl}}/brands
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer 4|fYSG5sohooyCbxbIe2pSZ2pQXniFqn0ZkH5rrOvxb34ecf1d
 
 {
     "name": "Lancômsse",

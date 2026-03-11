@@ -20,6 +20,8 @@ class OrderController extends Controller
     public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
+
+        $this->authorizeResource(Order::class, 'order');
     }
     /**
      * Display a listing of the resource.
@@ -39,8 +41,7 @@ class OrderController extends Controller
     public function store(StoreOrderRequest $request)
     {
         try {
-            // $userId = $request->user()->id;
-            $userId = 1;
+            $userId = $request->user()->id;
 
             $order = $this->orderService->createOrder($request->validated(), $userId);
 
@@ -75,15 +76,15 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        // 1. Validate cực chặt: Trạng thái truyền lên phải nằm trong Enum OrderStatus
+        $this->authorize('updateStatus', $order);
+
         $validated = $request->validate([
             'status' => ['required', new Enum(OrderStatus::class)]
         ]);
 
         try {
-            $userId = 1; // Giả lập User ID đang thao tác
+            $userId = $request->user()->id;
 
-            // 2. Gọi Service xử lý nghiệp vụ chuyển trạng thái
             $updatedOrder = $this->orderService->updateStatus($order, $validated['status'], $userId);
 
             return response()->json([
@@ -97,7 +98,7 @@ class OrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-            ], 400); // Trả về 400 Bad Request nếu chuyển trạng thái sai quy tắc
+            ], 400); 
         }
     }
 }

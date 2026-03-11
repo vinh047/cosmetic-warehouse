@@ -3,18 +3,29 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\BrandRequest;
+use App\Http\Requests\Brand\StoreBrandRequest;
+use App\Http\Requests\Brand\UpdateBrandRequest;
 use App\Http\Resources\BrandResource;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Brand::class, 'brand');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        // Kiểm tra quyền xem thùng rác nếu có truyền param ?trashed=...
+        if ($request->filled('trashed')) {
+            $this->authorize('viewTrash', Brand::class);
+        }
+
         $brands = Brand::query()
             ->withCount('products')
             ->filter($request->all())
@@ -26,7 +37,7 @@ class BrandController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(BrandRequest $request)
+    public function store(StoreBrandRequest $request)
     {
         $brand = Brand::create($request->validated());
 
@@ -48,7 +59,7 @@ class BrandController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(BrandRequest $request, Brand $brand)
+    public function update(UpdateBrandRequest $request, Brand $brand)
     {
         $brand->update($request->validated());
 
@@ -76,6 +87,24 @@ class BrandController extends Controller
             'status' => 'success',
             'message' => 'Brand moved to trash successfully.',
             'deleted_id' => $brand->id
+        ], 200);
+    }
+
+    public function restore($id)
+    {
+        // Chủ động tìm Brand trong thùng rác
+        $brand = Brand::withTrashed()->findOrFail($id);
+
+        // Gọi Policy để check xem ông này có quyền restore không
+        $this->authorize('restore', $brand);
+
+        // Thực hiện khôi phục
+        $brand->restore();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Brand restored successfully.',
+            'restored_id' => $brand->id
         ], 200);
     }
 }

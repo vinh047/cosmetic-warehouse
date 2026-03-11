@@ -48,4 +48,18 @@ trait CommonScopes
 
         return $query->latest();
     }
+
+    /**
+     * Scope dùng chung để lọc dữ liệu xóa mềm (Soft Deletes)
+     */
+    public function scopeFilterTrashed($query, $trashed = null)
+    {
+        return $query->when($trashed, function ($q, $trashed) {
+            if ($trashed === 'with') {
+                $q->withTrashed();
+            } elseif ($trashed === 'only') {
+                $q->onlyTrashed();
+            }
+        });
+    }
 }

@@ -36,6 +36,8 @@ class Category extends Model
 
             ->search($filters['search'] ?? null)
 
+            ->filterTrashed($filters['trashed'] ?? null)
+
             ->sort(
                 $filters['sort'] ?? null,
                 $filters['order'] ?? 'desc',

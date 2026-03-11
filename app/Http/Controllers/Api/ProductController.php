@@ -3,18 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductRequest;
+use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Product::class, 'product');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        if ($request->filled('trashed')) {
+            $this->authorize('viewTrash', Product::class);
+        }
+
         $products = Product::query()
             ->with(['brand:id,name', 'category:id,name'])
             ->filter($request->all())
@@ -26,7 +36,7 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductRequest $request)
+    public function store(StoreProductRequest $request)
     {
         $product = Product::create($request->validated());
 
@@ -47,7 +57,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
         $product->update($request->validated());
 
@@ -68,7 +78,27 @@ class ProductController extends Controller
         $product->delete();
 
         return response()->json([
-            'message' => 'The product has been deleted successfully.'
-        ]);
+            'status' => 'success',
+            'message' => 'The product has been moved to trash successfully.',
+            'deleted_id' => $product->id
+        ], 200);
+    }
+
+    public function restore($id)
+    {
+        // Chủ động lấy Product từ trong thùng rác ra
+        $product = Product::withTrashed()->findOrFail($id);
+
+        // Gọi Policy để check xem có quyền khôi phục không
+        $this->authorize('restore', $product);
+
+        // Tiến hành khôi phục
+        $product->restore();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Product restored successfully.',
+            'restored_id' => $product->id
+        ], 200);
     }
 }

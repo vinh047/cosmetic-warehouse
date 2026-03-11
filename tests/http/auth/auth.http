@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:8000/api
+# Sau khi chạy Request 1 thành công, copy access_token dán vào đây để test Request 2 và 3
+@token=1|your_sanctum_token_here_xxxxxx
+
+### 1. [Public] Đăng nhập hệ thống để lấy Token
+POST {{baseUrl}}/login
+Accept: application/json
+Content-Type: application/json
+
+{
+    "email": "manager@gmail.com",
+    "password": "password"
+}
+
+
+### 2. [Protected] Lấy thông tin Profile hiện tại (Kèm Role)
+GET {{baseUrl}}/me
+Accept: application/json
+Authorization: Bearer 3|JU2a2HmOLSPVCACglh6nBSE6W0xk7YJihYacFeSfcadd2675
+
+
+### 3. [Protected] Đăng xuất (Thu hồi Token)
+POST {{baseUrl}}/logout
+Accept: application/json
+Authorization: Bearer 3|JU2a2HmOLSPVCACglh6nBSE6W0xk7YJihYacFeSfcadd2675

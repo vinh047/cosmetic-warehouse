@@ -90,6 +90,7 @@ class ProductBatch extends Model
         return $query
             ->filterActive($filters['active'] ?? null)
             ->search($filters['search'] ?? null)
+            ->filterTrashed($filters['trashed'] ?? null)
             ->product($filters['product_id'] ?? null)
             ->expiryFrom($filters['expiry_from'] ?? null)
             ->expiryTo($filters['expiry_to'] ?? null)

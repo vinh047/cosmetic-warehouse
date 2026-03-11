@@ -3,18 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CategoryRequest;
+use App\Http\Requests\Category\StoreCategoryRequest;
+use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Category::class, 'category');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        if ($request->filled('trashed')) {
+            $this->authorize('viewTrash', Category::class);
+        }
+
         $categories = Category::query()
             ->withCount('products')
             ->filter($request->all())
@@ -26,7 +36,7 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CategoryRequest $request)
+    public function store(StoreCategoryRequest $request)
     {
         $category = Category::create($request->validated());
 
@@ -50,7 +60,7 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CategoryRequest $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
         $category->update($request->validated());
 
@@ -78,6 +88,23 @@ class CategoryController extends Controller
             'status' => 'success',
             'message' => 'Category moved to trash successfully.',
             'deleted_id' => $category->id
+        ], 200);
+    }
+
+    public function restore($id)
+    {
+        // Chủ động lấy Category trong thùng rác
+        $category = Category::withTrashed()->findOrFail($id);
+
+        // Gọi Policy kiểm tra quyền
+        $this->authorize('restore', $category);
+
+        $category->restore();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Category restored successfully.',
+            'restored_id' => $category->id
         ], 200);
     }
 }

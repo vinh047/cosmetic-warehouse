@@ -3,18 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductBatchRequest;
+use App\Http\Requests\ProductBatch\StoreProductBatchRequest;
+use App\Http\Requests\ProductBatch\UpdateProductBatchRequest;
 use App\Http\Resources\ProductBatchResource;
 use App\Models\ProductBatch;
 use Illuminate\Http\Request;
 
 class ProductBatchController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(ProductBatch::class, 'product_batch');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        if ($request->filled('trashed')) {
+            $this->authorize('viewTrash', ProductBatch::class);
+        }
+
         $productBatches = ProductBatch::query()
             ->withSum('stocks', 'quantity')
             ->filter($request->all())
@@ -25,7 +35,7 @@ class ProductBatchController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductBatchRequest $request)
+    public function store(StoreProductBatchRequest $request)
     {
         $batches = ProductBatch::create($request->validated());
 
@@ -46,7 +56,7 @@ class ProductBatchController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductBatchRequest $request, ProductBatch $productBatch)
+    public function update(UpdateProductBatchRequest $request, ProductBatch $productBatch)
     {
         $productBatch->update($request->validated());
 
@@ -84,5 +94,20 @@ class ProductBatchController extends Controller
         return response()->json([
             'message' => 'The product batch has been deleted successfully.'
         ]);
+    }
+
+    public function restore($id)
+    {
+        $productBatch = ProductBatch::withTrashed()->findOrFail($id);
+
+        $this->authorize('restore', $productBatch);
+
+        $productBatch->restore();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Product batch restored successfully.',
+            'restored_id' => $productBatch->id
+        ], 200);
     }
 }

@@ -1,11 +1,10 @@
 @baseUrl = http://localhost:8000/api
-# Đổi token này thành token thật của bạn sau khi login bằng Sanctum
-@token = 1|your_sanctum_token_here_xxxxxx
+@token = 1|neNLYCqY0KeX0u11bp1jzJGJftmejzERVF6QVp8sc0dd38c
 
 ### 1. Lấy danh sách Mặc định (Trang 1, 10 dòng/trang)
-GET {{baseUrl}}/orders/10
+GET {{baseUrl}}/orders/
 Accept: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer 3|JU2a2HmOLSPVCACglh6nBSE6W0xk7YJihYacFeSfcadd2675
 
 
 ### 2. Tìm theo Mã đơn hàng (Gõ một phần của mã)

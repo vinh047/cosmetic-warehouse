@@ -47,6 +47,7 @@ class Warehouse extends Model
         return $query
             ->filterActive($filters['active'] ?? null)
             ->search($filters['search'] ?? null)
+            ->filterTrashed($filters['trashed'] ?? null)
             ->sort(
                 $filters['sort'] ?? null,
                 $filters['order'] ?? 'desc',

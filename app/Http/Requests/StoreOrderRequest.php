@@ -14,7 +14,6 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // update*
         return true;
     }
 
