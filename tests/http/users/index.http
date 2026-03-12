@@ -1,0 +1,5 @@
+@baseUrl = http://localhost:8000/api
+
+### 1. [BASIC] Lấy danh sách mặc định (Page 1, 10 bản ghi/trang)
+GET {{baseUrl}}/users/1
+Accept: application/json

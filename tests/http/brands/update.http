@@ -1,7 +1,8 @@
 ### [UPDATE] Case 1: Cập nhật thành công (Chỉ đổi quốc gia)
 PUT {{baseUrl}}/brands/1
-Content-Type: application/json
 Accept: application/json
+Content-Type: application/json
+Authorization: Bearer 6|2g2pQUpLa4T3hp5e9OLJVF7798QdzaQVtyjIz4h7e203e22e
 
 {
     "country": "France"
@@ -9,11 +10,12 @@ Accept: application/json
 
 ### [UPDATE] Case 2: Đổi tên trùng với thương hiệu khác (Phải báo lỗi 422)
 PUT {{baseUrl}}/brands/1
-Content-Type: application/json
 Accept: application/json
+Content-Type: application/json
+Authorization: Bearer 6|2g2pQUpLa4T3hp5e9OLJVF7798QdzaQVtyjIz4h7e203e22e
 
 {
-    "name": "Tên Đã Tồn Tại"
+    "name": "Apple"
 }
 
 ### [UPDATE] Case 3: Tắt trạng thái hoạt động

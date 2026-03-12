@@ -1,0 +1,44 @@
+# Khai báo biến môi trường
+@baseUrl = http://localhost:8000/api
+@adminToken = 6|2g2pQUpLa4T3hp5e9OLJVF7798QdzaQVtyjIz4h7e203e22e
+@staffToken = ĐIỀN_TOKEN_CỦA_STAFF_VÀO_ĐÂY
+
+# Giả sử: ID 1 là Admin (chủ token @adminToken), ID 2 là một User bình thường.
+
+# ==========================================
+# [THÀNH CÔNG - KỲ VỌNG: 200 OK]
+# ==========================================
+
+### 1. Admin xóa một Staff/Manager hợp lệ (Kỳ vọng: 200 OK)
+# Lưu ý: Vì dùng SoftDeletes, data vẫn còn trong DB, chỉ được cập nhật cột deleted_at
+DELETE {{baseUrl}}/users/2
+Accept: application/json
+Authorization: Bearer 7|DB8FaO9MRsIKacnfCYjYGh98t2tX4KvO2N2G0IHF038aa0ce
+
+
+# ==========================================
+# [THẤT BẠI - KỲ VỌNG: 403, 404, 401]
+# ==========================================
+
+### 2. Bẫy "Tự sát": Admin tự xóa chính tài khoản đang login (Kỳ vọng: 403 Forbidden)
+# Phải văng ra dòng chữ: "Action denied: You cannot delete your own account."
+DELETE {{baseUrl}}/users/7
+Accept: application/json
+Authorization: Bearer {{adminToken}}
+
+### 3. Vượt quyền: Staff cố tình đi xóa User khác (Kỳ vọng: 403 Forbidden)
+# Policy (Gate) sẽ chặn lại và văng lỗi mặc định của Laravel
+DELETE {{baseUrl}}/users/2
+Accept: application/json
+Authorization: Bearer {{staffToken}}
+
+### 4. Xóa User ma (Kỳ vọng: 404 Not Found)
+# Cố tình xóa một ID không tồn tại trên đời
+DELETE {{baseUrl}}/users/99999
+Accept: application/json
+Authorization: Bearer {{adminToken}}
+
+### 5. Quên token (Kỳ vọng: 401 Unauthorized)
+# Không gửi token để test Middleware Auth Sanctum
+DELETE {{baseUrl}}/users/2
+Accept: application/json

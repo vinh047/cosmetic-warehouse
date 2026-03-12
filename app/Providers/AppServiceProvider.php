@@ -6,6 +6,7 @@ use App\Enums\InventoryReferenceType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +27,11 @@ class AppServiceProvider extends ServiceProvider
             InventoryReferenceType::ORDER->value      => \App\Models\Order::class,
             'user'  => User::class,
         ]);
+        
+        Password::defaults(function () {
+            return Password::min(6)
+                ->letters()
+                ->numbers();
+        });
     }
 }

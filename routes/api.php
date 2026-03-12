@@ -8,15 +8,13 @@ use App\Http\Controllers\Api\InventoryTransactionController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductBatchController;
 use App\Http\Controllers\Api\StockController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WarehouseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
-
-
-
 
 
 
@@ -60,4 +58,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // order
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
     Route::apiResource('orders', OrderController::class)->except(['update', 'destroy']);
+
+    // User
+    Route::post('users/{id}/restore', [UserController::class, 'restore']);
+    Route::apiResource('users', UserController::class);
 });

@@ -1,0 +1,91 @@
+# Khai báo biến môi trường
+@baseUrl = http://localhost:8000/api
+@adminToken = 6|2g2pQUpLa4T3hp5e9OLJVF7798QdzaQVtyjIz4h7e203e22e
+@staffToken = ĐIỀN_TOKEN_CỦA_STAFF_VÀO_ĐÂY
+
+# Cần 2 User ID để test bẫy trùng Email
+# Giả sử: ID 1 là Admin (admin@example.com), ID 2 là Staff (staff@example.com)
+
+# ==========================================
+# [THÀNH CÔNG - KỲ VỌNG: 200 OK]
+# ==========================================
+
+### 1. Chỉ cập nhật Tên và Quyền (Không đụng Email và Password)
+PUT {{baseUrl}}/users/2
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+    "name": "Staff Đã Được Lên Chức",
+    "role": "manager"
+}
+
+### 2. Cập nhật Mật khẩu mới (Có cả chữ và số)
+PUT {{baseUrl}}/users/2
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+    "password": "NewPassword123"
+}
+
+### 3. Gửi lại Email cũ của chính nó (Test bẫy Rule::ignore)
+# Lỗi kinh điển hay gặp là báo trùng email chính mình, nhưng ta đã fix nên nó phải pass 200 OK
+PUT {{baseUrl}}/users/2
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+    "email": "staff@example.com",
+    "name": "Đổi Tên Nhưng Giữ Email"
+}
+
+
+# ==========================================
+# [THẤT BẠI - KỲ VỌNG: 422 Unprocessable Entity & 403 Forbidden]
+# ==========================================
+
+### 4. Lỗi trùng Email của người khác (Kỳ vọng: 422)
+# Cố tình lấy email của User 1 (Admin) đập vào cho User 2
+PUT {{baseUrl}}/users/7
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+    "email": "admin@gmail.com"
+}
+
+### 5. Cập nhật quyền tào lao (Kỳ vọng: 422)
+PUT {{baseUrl}}/users/2
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+    "role": "super_admin_vip_pro"
+}
+
+### 6. Cập nhật mật khẩu quá yếu (Kỳ vọng: 422)
+PUT {{baseUrl}}/users/2
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+    "password": "123"
+}
+
+### 7. Staff đòi cập nhật thông tin (Kỳ vọng: 403 Forbidden)
+# Dùng token của Staff cố gắng đi sửa quyền của Admin
+PUT {{baseUrl}}/users/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{staffToken}}
+
+{
+    "role": "staff"
+}

@@ -1,0 +1,38 @@
+# Khai báo biến môi trường
+@baseUrl = http://localhost:8000/api
+@adminToken = 6|2g2pQUpLa4T3hp5e9OLJVF7798QdzaQVtyjIz4h7e203e22e
+# Lát nữa bạn tạo 1 tài khoản staff, login lấy token rồi dán vào đây để test case 4 nhé
+@staffToken = ĐIỀN_TOKEN_CỦA_STAFF_VÀO_ĐÂY
+
+# ==========================================
+# [THÀNH CÔNG - KỲ VỌNG: 200 OK]
+# ==========================================
+
+### 1. Xem chi tiết user hợp lệ (Admin xem)
+# Dữ liệu trả về PHẢI CÓ "orders_count" và "transactions_count"
+GET {{baseUrl}}/users/1
+Accept: application/json
+Authorization: Bearer {{adminToken}}
+
+
+# ==========================================
+# [THẤT BẠI - CÁC TRƯỜNG HỢP BẮT LỖI]
+# ==========================================
+
+### 2. User không tồn tại (Kỳ vọng: 404 Not Found)
+# Test xem Laravel có tự động bắn lỗi 404 khi không tìm thấy ID không
+GET {{baseUrl}}/users/99999
+Accept: application/json
+Authorization: Bearer {{adminToken}}
+
+### 3. Quên gửi Token (Kỳ vọng: 401 Unauthorized)
+# Cố tình không gửi kèm header Authorization
+GET {{baseUrl}}/users/1
+Accept: application/json
+
+
+### 4. Sai quyền hạn / Phân quyền (Kỳ vọng: 403 Forbidden)
+# Dùng token của Staff để cố gắng xem danh sách/chi tiết User (Policy chỉ cho Admin)
+GET {{baseUrl}}/users/1
+Accept: application/json
+Authorization: Bearer {{staffToken}}

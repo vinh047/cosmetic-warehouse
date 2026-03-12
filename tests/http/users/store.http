@@ -1,0 +1,87 @@
+# Khai báo biến môi trường (Nhớ thay token của Admin vào nhé)
+@baseUrl = http://localhost:8000/api
+@token = 6|2g2pQUpLa4T3hp5e9OLJVF7798QdzaQVtyjIz4h7e203e22e
+
+# ==========================================
+# [THÀNH CÔNG]
+# ==========================================
+
+### 1. Dữ liệu chuẩn (Kỳ vọng: 201 Created)
+POST {{baseUrl}}/users
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Hoang Van C",
+    "email": "hoangc.staff@example.com",
+    "password": "Password123",
+    "role": "staff",
+    "is_active": true
+}
+
+### 2. Dữ liệu chuẩn nhưng thiếu is_active (Kỳ vọng: 201 Created, DB tự set default)
+POST {{baseUrl}}/users
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Le Thi D",
+    "email": "lethid@example.com",
+    "password": "Password123",
+    "role": "manager"
+}
+
+
+# ==========================================
+# [THẤT BẠI - KỲ VỌNG: 422 Unprocessable Entity]
+# ==========================================
+
+### 3. Bỏ trống tất cả các trường bắt buộc
+POST {{baseUrl}}/users
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+}
+
+### 4. Lỗi định dạng Email và Role vớ vẩn
+POST {{baseUrl}}/users
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Hacker",
+    "email": "khong-phai-email-hop-le",
+    "password": "Password123",
+    "role": "super_hacker" 
+}
+
+### 5. Lỗi trùng Email (Lấy lại email ở test case 1)
+POST {{baseUrl}}/users
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Kẻ mạo danh",
+    "email": "hoangc.staff@example.com",
+    "password": "Password123",
+    "role": "staff"
+}
+
+### 6. Lỗi mật khẩu yếu (Không đủ 6 ký tự hoặc không có số theo Rule Password::defaults)
+POST {{baseUrl}}/users
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Người lười biếng",
+    "email": "lazy@example.com",
+    "password": "123", 
+    "role": "staff"
+}
