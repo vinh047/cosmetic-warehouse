@@ -8,19 +8,17 @@ use App\Http\Requests\Warehouse\UpdateWarehouseRequest;
 use App\Http\Resources\WarehouseResource;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class WarehouseController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(Warehouse::class, 'warehouse');
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Warehouse::class);
+
         if ($request->filled('trashed')) {
             $this->authorize('viewTrash', Warehouse::class);
         }
@@ -43,6 +41,8 @@ class WarehouseController extends Controller
      */
     public function store(StoreWarehouseRequest $request)
     {
+        Gate::authorize('create', Warehouse::class);
+
         $warehouse = Warehouse::create($request->validated());
 
         return (new WarehouseResource($warehouse))
@@ -55,6 +55,8 @@ class WarehouseController extends Controller
      */
     public function show(Warehouse $warehouse)
     {
+        Gate::authorize('view', $warehouse);
+
         $warehouse->loadCount('stocks');
         $warehouse->loadSum('stocks', 'quantity');
 
@@ -68,6 +70,8 @@ class WarehouseController extends Controller
      */
     public function update(UpdateWarehouseRequest $request, Warehouse $warehouse)
     {
+        Gate::authorize('update', $warehouse);
+
         $warehouse->update($request->validated());
 
         return new WarehouseResource($warehouse);
@@ -78,6 +82,8 @@ class WarehouseController extends Controller
      */
     public function destroy(Warehouse $warehouse)
     {
+        Gate::authorize('delete', $warehouse);
+
         $hasInventory = $warehouse->stocks()
             ->where('quantity', '>', 0)
             ->exists();
@@ -98,6 +104,9 @@ class WarehouseController extends Controller
     public function restore($id)
     {
         $warehouse = Warehouse::withTrashed()->findOrFail($id);
+
+        Gate::authorize('restore', $warehouse);
+
         $this->authorize('restore', $warehouse);
         $warehouse->restore();
 

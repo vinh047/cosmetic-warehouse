@@ -8,21 +8,20 @@ use App\Http\Resources\InventoryTransactionResource;
 use App\Models\InventoryTransaction;
 use App\Models\Stock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 class InventoryTransactionController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(InventoryTransaction::class, 'inventory_transaction');
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', InventoryTransaction::class);
+
         $transactions = InventoryTransaction::with(['user', 'warehouse', 'productBatch.product'])
             ->filter($request->all())
             // update*
@@ -34,11 +33,14 @@ class InventoryTransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // update*
     public function store(StoreInventoryTransactionRequest $request)
     {
+        Gate::authorize('create', InventoryTransaction::class);
+
         $data = $request->validated();
 
-        $data['user_id'] = 1;
+        $data['user_id'] = Auth::id();
 
         return DB::transaction(function () use ($data) {
             $stock = Stock::where('warehouse_id', $data['warehouse_id'])
@@ -74,6 +76,18 @@ class InventoryTransactionController extends Controller
         });
     }
 
+    /**
+     * Display the specified resource.
+     */
+    public function show(InventoryTransaction $inventoryTransaction)
+    {
+        Gate::authorize('view', $inventoryTransaction);
+
+        $inventoryTransaction->load(['user', 'warehouse', 'productBatch.product']);
+
+        return new InventoryTransactionResource($inventoryTransaction);
+    }
+
     private function handleOut($stock, $quantity)
     {
         if ($stock->quantity < $quantity) {
@@ -82,15 +96,5 @@ class InventoryTransactionController extends Controller
             ]);
         }
         $stock->quantity -= $quantity;
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(InventoryTransaction $inventoryTransaction)
-    {
-        $inventoryTransaction->load(['user', 'warehouse', 'productBatch.product']);
-
-        return new InventoryTransactionResource($inventoryTransaction);
     }
 }

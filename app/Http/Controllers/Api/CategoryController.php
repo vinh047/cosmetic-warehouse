@@ -8,19 +8,17 @@ use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(Category::class, 'category');
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Category::class);
+
         if ($request->filled('trashed')) {
             $this->authorize('viewTrash', Category::class);
         }
@@ -38,6 +36,8 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
+        Gate::authorize('create', Category::class);
+
         $category = Category::create($request->validated());
 
         return (new CategoryResource($category))
@@ -48,11 +48,11 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Category $category)
     {
-        $category = Category::withCount('products')
-            ->with(['products'])
-            ->findOrFail($id);
+        Gate::authorize('view', $category);
+
+        $category->loadCount('products')->load('products');
 
         return new CategoryResource($category);
     }
@@ -62,6 +62,8 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
+        Gate::authorize('update', $category);
+
         $category->update($request->validated());
 
         return new CategoryResource($category);
@@ -72,6 +74,8 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        Gate::authorize('delete', $category);
+
         // kiểm tra category có sản phẩm ko
         // có sản phẩm ko cho xóa
         if ($category->products()->exists()) {
@@ -95,6 +99,8 @@ class CategoryController extends Controller
     {
         // Chủ động lấy Category trong thùng rác
         $category = Category::withTrashed()->findOrFail($id);
+
+        Gate::authorize('restore', $category);
 
         // Gọi Policy kiểm tra quyền
         $this->authorize('restore', $category);

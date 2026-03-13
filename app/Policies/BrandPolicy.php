@@ -8,6 +8,13 @@ use Illuminate\Auth\Access\Response;
 
 class BrandPolicy
 {
+    public function before(User $user, $capability)
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+    }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +36,7 @@ class BrandPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -37,7 +44,7 @@ class BrandPolicy
      */
     public function update(User $user, Brand $brand): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -45,12 +52,12 @@ class BrandPolicy
      */
     public function delete(User $user, Brand $brand): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     public function viewTrash(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -58,6 +65,6 @@ class BrandPolicy
      */
     public function restore(User $user, Brand $brand): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 }

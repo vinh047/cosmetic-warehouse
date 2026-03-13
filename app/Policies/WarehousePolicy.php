@@ -8,6 +8,11 @@ use Illuminate\Auth\Access\Response;
 
 class WarehousePolicy
 {
+    public function before(User $user)
+    {
+        return $user->isAdmin();
+    }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +34,7 @@ class WarehousePolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -37,7 +42,7 @@ class WarehousePolicy
      */
     public function update(User $user, Warehouse $warehouse): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -45,12 +50,12 @@ class WarehousePolicy
      */
     public function delete(User $user, Warehouse $warehouse): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     public function viewTrash(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -58,6 +63,6 @@ class WarehousePolicy
      */
     public function restore(User $user, Warehouse $warehouse): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 }

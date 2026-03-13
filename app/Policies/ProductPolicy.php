@@ -8,6 +8,11 @@ use Illuminate\Auth\Access\Response;
 
 class ProductPolicy
 {
+    public function before(User $user)
+    {
+        if ($user->isAdmin()) return true;
+    }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +34,7 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -37,7 +42,7 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -45,12 +50,12 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     public function viewTrash(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']); // Chặn Staff xem thùng rác
+        return $user->isManager(); // Chặn Staff xem thùng rác
     }
 
     /**
@@ -58,6 +63,6 @@ class ProductPolicy
      */
     public function restore(User $user, Product $product): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 }

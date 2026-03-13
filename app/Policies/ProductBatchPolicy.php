@@ -8,6 +8,11 @@ use Illuminate\Auth\Access\Response;
 
 class ProductBatchPolicy
 {
+    public function before(User $user)
+    {
+        return $user->isAdmin();
+    }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +34,7 @@ class ProductBatchPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return true;
     }
 
     /**
@@ -37,7 +42,7 @@ class ProductBatchPolicy
      */
     public function update(User $user, ProductBatch $productBatch): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -45,13 +50,13 @@ class ProductBatchPolicy
      */
     public function delete(User $user, ProductBatch $productBatch): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
 
     public function viewTrash(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -59,6 +64,6 @@ class ProductBatchPolicy
      */
     public function restore(User $user, ProductBatch $productBatch): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 }

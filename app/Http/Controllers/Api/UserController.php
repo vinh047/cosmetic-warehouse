@@ -18,7 +18,11 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // Gate::authorize('viewAny', User::class);
+        Gate::authorize('viewAny', User::class);
+
+        if ($request->filled('trashed')) {
+            Gate::authorize('viewTrash', User::class);
+        }
 
         $users = User::query()
             ->withCount(['orders', 'inventoryTransactions'])

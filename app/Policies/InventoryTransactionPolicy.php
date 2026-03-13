@@ -13,7 +13,7 @@ class InventoryTransactionPolicy
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return true;
     }
 
     /**
@@ -21,7 +21,7 @@ class InventoryTransactionPolicy
      */
     public function view(User $user, InventoryTransaction $inventoryTransaction): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return true;
     }
 
     /**
@@ -29,22 +29,6 @@ class InventoryTransactionPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
-    }
-
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, InventoryTransaction $inventoryTransaction): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, InventoryTransaction $inventoryTransaction): bool
-    {
-        return false;
+        return true;
     }
 }

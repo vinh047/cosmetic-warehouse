@@ -8,19 +8,17 @@ use App\Http\Requests\ProductBatch\UpdateProductBatchRequest;
 use App\Http\Resources\ProductBatchResource;
 use App\Models\ProductBatch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ProductBatchController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(ProductBatch::class, 'product_batch');
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', ProductBatch::class);
+
         if ($request->filled('trashed')) {
             $this->authorize('viewTrash', ProductBatch::class);
         }
@@ -37,6 +35,8 @@ class ProductBatchController extends Controller
      */
     public function store(StoreProductBatchRequest $request)
     {
+        Gate::authorize('create', ProductBatch::class);
+
         $batches = ProductBatch::create($request->validated());
 
         return (new ProductBatchResource($batches))
@@ -49,6 +49,8 @@ class ProductBatchController extends Controller
      */
     public function show(ProductBatch $productBatch)
     {
+        Gate::authorize('view', $productBatch);
+
         $productBatch->load(['product'])->loadSum('stocks', 'quantity');
         return new ProductBatchResource($productBatch);
     }
@@ -58,6 +60,8 @@ class ProductBatchController extends Controller
      */
     public function update(UpdateProductBatchRequest $request, ProductBatch $productBatch)
     {
+        Gate::authorize('update', $productBatch);
+
         $productBatch->update($request->validated());
 
         return new ProductBatchResource($productBatch);
@@ -68,6 +72,8 @@ class ProductBatchController extends Controller
      */
     public function destroy(ProductBatch $productBatch)
     {
+        Gate::authorize('delete', $productBatch);
+
         // Kiểm tra tồn kho
         if ($productBatch->stocks()->exists()) {
             return response()->json([
@@ -99,6 +105,8 @@ class ProductBatchController extends Controller
     public function restore($id)
     {
         $productBatch = ProductBatch::withTrashed()->findOrFail($id);
+
+        Gate::authorize('restore', $productBatch);
 
         $this->authorize('restore', $productBatch);
 

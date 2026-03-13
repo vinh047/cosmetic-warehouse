@@ -8,19 +8,17 @@ use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ProductController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(Product::class, 'product');
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Product::class);
+
         if ($request->filled('trashed')) {
             $this->authorize('viewTrash', Product::class);
         }
@@ -38,6 +36,8 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
+        Gate::authorize('create', Product::class);
+
         $product = Product::create($request->validated());
 
         return (new ProductResource($product))
@@ -50,6 +50,8 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
+        Gate::authorize('view', $product);
+
         $product->load(['brand', 'category']);
         return new ProductResource($product);
     }
@@ -59,6 +61,8 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
+        Gate::authorize('update', $product);
+
         $product->update($request->validated());
 
         return new ProductResource($product);
@@ -69,6 +73,8 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        Gate::authorize('delete', $product);
+
         if ($product->batches()->exists()) {
             return response()->json([
                 'message' => 'This product cannot be deleted because it has import history. Please deactivate it instead (set Active = false).'
@@ -88,6 +94,8 @@ class ProductController extends Controller
     {
         // Chủ động lấy Product từ trong thùng rác ra
         $product = Product::withTrashed()->findOrFail($id);
+
+        Gate::authorize('restore', $product);
 
         // Gọi Policy để check xem có quyền khôi phục không
         $this->authorize('restore', $product);

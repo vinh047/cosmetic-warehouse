@@ -8,6 +8,11 @@ use Illuminate\Auth\Access\Response;
 
 class CategoryPolicy
 {
+    public function before(User $user, $capability)
+    {
+        if ($user->isAdmin()) return true;
+    }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +34,7 @@ class CategoryPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -37,7 +42,7 @@ class CategoryPolicy
      */
     public function update(User $user, Category $category): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -45,12 +50,12 @@ class CategoryPolicy
      */
     public function delete(User $user, Category $category): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     public function viewTrash(User $user): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 
     /**
@@ -58,6 +63,6 @@ class CategoryPolicy
      */
     public function restore(User $user, Category $category): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->isManager();
     }
 }

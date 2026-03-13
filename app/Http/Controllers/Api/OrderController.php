@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Enum;
 
@@ -20,14 +21,14 @@ class OrderController extends Controller
     public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
-
-        $this->authorizeResource(Order::class, 'order');
     }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Order::class);
+
         $orders = Order::with('creator')
             ->filter($request->all())
             ->paginate($request->input('per_page', 10));
@@ -40,6 +41,8 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
+        Gate::authorize('create', Order::class);
+
         try {
             $userId = $request->user()->id;
 
@@ -70,12 +73,16 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
+        Gate::authorize('view', $order);
+
         $order->load(['creator', 'items']);
         return new OrderResource($order);
     }
 
     public function updateStatus(Request $request, Order $order)
     {
+        Gate::authorize('updateStatus', $order);
+        
         $this->authorize('updateStatus', $order);
 
         $validated = $request->validate([
@@ -98,7 +105,7 @@ class OrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-            ], 400); 
+            ], 400);
         }
     }
 }

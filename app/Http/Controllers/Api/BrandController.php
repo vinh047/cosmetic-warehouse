@@ -8,19 +8,17 @@ use App\Http\Requests\Brand\UpdateBrandRequest;
 use App\Http\Resources\BrandResource;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class BrandController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(Brand::class, 'brand');
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Brand::class);
+
         // Kiểm tra quyền xem thùng rác nếu có truyền param ?trashed=...
         if ($request->filled('trashed')) {
             $this->authorize('viewTrash', Brand::class);
@@ -39,6 +37,8 @@ class BrandController extends Controller
      */
     public function store(StoreBrandRequest $request)
     {
+        Gate::authorize('create', Brand::class);
+
         $brand = Brand::create($request->validated());
 
         return (new BrandResource($brand))
@@ -51,6 +51,8 @@ class BrandController extends Controller
      */
     public function show(Brand $brand)
     {
+        Gate::authorize('view', $brand);
+
         $brand->load('products');
 
         return new BrandResource($brand);
@@ -61,6 +63,7 @@ class BrandController extends Controller
      */
     public function update(UpdateBrandRequest $request, Brand $brand)
     {
+        Gate::authorize('update', $brand);
         $brand->update($request->validated());
 
         return new BrandResource($brand);
@@ -71,6 +74,8 @@ class BrandController extends Controller
      */
     public function destroy(Brand $brand)
     {
+        Gate::authorize('delete', $brand);
+
         // kiểm tra brand có sản phẩm ko
         // có sản phẩm ko cho xóa
         if ($brand->products()->exists()) {
@@ -94,6 +99,8 @@ class BrandController extends Controller
     {
         // Chủ động tìm Brand trong thùng rác
         $brand = Brand::withTrashed()->findOrFail($id);
+
+        Gate::authorize('restore', $brand);
 
         // Gọi Policy để check xem ông này có quyền restore không
         $this->authorize('restore', $brand);
