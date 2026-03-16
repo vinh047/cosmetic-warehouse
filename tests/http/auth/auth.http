@@ -8,7 +8,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "email": "manager@gmail.com",
+    "email": "admin@gmail.com",
     "password": "password"
 }
 

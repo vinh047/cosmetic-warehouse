@@ -69,4 +69,9 @@ class Product extends Model
                 ['id', 'name', 'sku', 'price', 'is_active']
             );
     }
+
+    public function alert()
+    {
+        return $this->hasOne(ProductAlert::class);
+    }
 }

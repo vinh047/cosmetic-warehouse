@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\InventoryTransactionController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductBatchController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WarehouseController;
@@ -62,4 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // User
     Route::post('users/{id}/restore', [UserController::class, 'restore']);
     Route::apiResource('users', UserController::class);
+
+    Route::post('/reports/inventory-export', [ReportController::class, 'exportInventory'])->middleware('auth:sanctum');
 });

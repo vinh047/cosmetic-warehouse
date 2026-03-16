@@ -9,7 +9,7 @@
 POST {{baseUrl}}/orders
 Content-Type: application/json
 Accept: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer 3|R4XdxOnRroaoXhmv3cwFJpad3KNRAx0LBPWojFXF630b8e10
 
 {
     "customer_name": "Nguyễn Văn A (Khách lẻ)",
@@ -19,7 +19,7 @@ Authorization: Bearer {{token}}
         {
             "product_batch_id": 1, 
             "quantity": 2
-        },
+        },  
         {
             "product_batch_id": 2, 
             "quantity": 1
@@ -37,7 +37,7 @@ Authorization: Bearer {{token}}
 POST {{baseUrl}}/orders
 Content-Type: application/json
 Accept: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer 2|QyghYv6hVKC6zj9EWKK7GNQ3PNdgIvUGdfmkjbPb461ba29e
 
 {
     "customer_name": "Trần Thị B (Khách Web)",
