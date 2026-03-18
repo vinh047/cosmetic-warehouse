@@ -10,8 +10,13 @@ use App\Models\InventoryTransaction;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Stock;
+use App\Models\User;
+use App\Notifications\OrderCreatedNotification;
+use App\Notifications\OrderStatusUpdatedNotification;
 use Exception;
+use Illuminate\Notifications\Notification as BaseNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class OrderService
 {
@@ -100,8 +105,11 @@ class OrderService
 
             // Cập nhật tổng giá trị đơn hàng
             $order->update(['total_price' => $totalPrice]);
+            $order = $order->load('items.productBatch.product');
 
-            return $order->load('items.productBatch.product');
+            $this->notifyManagersAndAdmins(new OrderCreatedNotification($order));
+
+            return $order;
         });
     }
 
@@ -147,6 +155,7 @@ class OrderService
         }
 
         return DB::transaction(function () use ($order, $newStatus, $userId) {
+            $oldStatus = $order->status->value;
 
             // Cập nhật trạng thái mới
             $order->update(['status' => $newStatus]);
@@ -158,8 +167,27 @@ class OrderService
             // update*
             // Nếu là COMPLETED thì có thể kích hoạt luồng Gửi Email Cảm ơn, Cộng điểm tích lũy... 
 
-            return $order->refresh();
+            $refreshedOrder = $order->refresh();
+            $this->notifyManagersAndAdmins(new OrderStatusUpdatedNotification(
+                $refreshedOrder,
+                $oldStatus,
+                $newStatus
+            ));
+
+            return $refreshedOrder;
         });
+    }
+
+    private function notifyManagersAndAdmins(BaseNotification $notification): void
+    {
+        $receivers = User::query()
+            ->whereIn('role', ['admin', 'manager'])
+            ->where('is_active', true)
+            ->get();
+
+        if ($receivers->isNotEmpty()) {
+            Notification::send($receivers, $notification);
+        }
     }
 
     /**

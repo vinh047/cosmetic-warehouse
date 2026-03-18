@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\InventoryTransactionController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductBatchController;
 use App\Http\Controllers\Api\StockController;
@@ -58,6 +59,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // order
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
     Route::apiResource('orders', OrderController::class)->except(['update', 'destroy']);
+
+    // notifications
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 
     // User
     Route::post('users/{id}/restore', [UserController::class, 'restore']);
