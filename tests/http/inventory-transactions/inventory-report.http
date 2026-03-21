@@ -1,40 +1,11 @@
 @baseUrl = http://localhost:8000/api
-# Thay token của bạn vào đây sau khi login thành công
 @token = 3|JU2a2HmOLSPVCACglh6nBSE6W0xk7YJihYacFeSfcadd2675
-
-### 1. [Public] Đăng nhập hệ thống để lấy Token
-POST {{baseUrl}}/login
-Accept: application/json
-Content-Type: application/json
-
-{
-    "email": "admin@gmail.com",
-    "password": "password"
-}
-
-
-### 2. [Protected] Lấy thông tin Profile hiện tại (Kèm Role)
-GET {{baseUrl}}/me
-Accept: application/json
-Authorization: Bearer {{token}}
-
-
-### 3. [Protected] Đăng xuất (Thu hồi Token)
-POST {{baseUrl}}/logout
-Accept: application/json
-Authorization: Bearer {{token}}
-
-
-# ========================================================
-# CÁC API MỚI CHO TÍNH NĂNG BÁO CÁO KHO
-# ========================================================
-
-### 4. [Protected] Yêu cầu xuất Báo cáo Giao dịch Kho (Async Data Export)
+###. [Protected] Yêu cầu xuất Báo cáo Giao dịch Kho (Async Data Export)
 # Trả về mã 202 Accepted ngay lập tức, Queue sẽ tạo file Excel ngầm
 POST {{baseUrl}}/reports/inventory-export
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer 3|R4XdxOnRroaoXhmv3cwFJpad3KNRAx0LBPWojFXF630b8e10
+Authorization: Bearer 2|Kvs4yAfCmf5rXshf5KeFCnIhtqFc0BuxeO5qtYrn96b9fb30
 
 {
     "month": 3,

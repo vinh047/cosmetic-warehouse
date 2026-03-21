@@ -10,10 +10,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
+use Maatwebsite\Excel\Facades\Excel;
 
 class GenerateExcelReportJob implements ShouldQueue
 {
@@ -22,61 +22,50 @@ class GenerateExcelReportJob implements ShouldQueue
     public $timeout = 300;
     public $tries = 3;
 
-    protected $month;
-    protected $year;
-    protected $managerId;
-
-    public function __construct($month, $year, $managerId)
-    {
-        $this->month = $month;
-        $this->year = $year;
-        $this->managerId = $managerId;
-    }
+    public function __construct(
+        protected int $month,
+        protected int $year,
+        protected int $managerId
+    ) {}
 
     public function handle(): void
     {
+        $manager = User::find($this->managerId);
+        
+        if (!$manager) {
+            Log::warning("Job Excel: Không tìm thấy quản lý ID {$this->managerId}");
+            return;
+        }
+
         try {
+            Log::info("Job Excel: Bắt đầu xử lý dữ liệu cho {$manager->email}");
 
-            $manager = User::find($this->managerId);
+            // 1. Tạo tên file duy nhất (tránh trùng lặp nếu xuất nhiều lần)
+            $timestamp = time();
+            $fileName = "inventory_report_{$this->month}_{$this->year}_{$timestamp}.xlsx";
+            $filePath = "reports/{$fileName}";
 
-            if (!$manager) {
-                Log::warning("Manager not found: " . $this->managerId);
-                return;
-            }
+            // 2. Lưu file Excel vào thư mục storage/app/reports
+            Excel::store(new InventoryTransactionExport($this->month, $this->year), $filePath, 'local');
 
-            // Tạo tên file
-            $fileName = "inventory_report_{$this->month}_{$this->year}_" . time() . ".xlsx";
-
-            // Đường dẫn lưu file
-            $filePath = "exports/" . $fileName;
-
-            // Tạo file Excel
-            Excel::store(
-                new InventoryTransactionExport($this->month, $this->year),
-                $filePath,
-                'local'
+            // 3. Tạo link tải file có mã hóa (sống trong 7 ngày)
+            $downloadUrl = URL::temporarySignedRoute(
+                'report.download', 
+                now()->addDays(7), // Link hết hạn sau 7 ngày
+                ['fileName' => $fileName]
             );
 
-            Log::info("Excel file created: " . $filePath);
+            // 4. Gửi Mail chứa link tải
+            Mail::to($manager->email)->send(new InventoryExportMail(
+                $this->month, 
+                $this->year,
+                $downloadUrl // Truyền link vào mail
+            ));
 
-            // Gửi mail
-            Mail::to($manager->email)
-                ->send(new InventoryExportMail(
-                    $filePath,
-                    $fileName,
-                    $this->month,
-                    $this->year
-                ));
-
-            Log::info("Mail sent to: " . $manager->email);
-
-            // Xóa file sau khi gửi
-            Storage::disk('local')->delete($filePath);
+            Log::info("Job Excel: Đã gửi link báo cáo thành công tới {$manager->email}");
 
         } catch (\Exception $e) {
-
-            Log::error('Excel export job failed: ' . $e->getMessage());
-
+            Log::error("Job Excel Thất bại: " . $e->getMessage());
             throw $e;
         }
     }

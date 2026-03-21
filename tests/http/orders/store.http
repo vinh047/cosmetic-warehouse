@@ -9,7 +9,7 @@
 POST {{baseUrl}}/orders
 Content-Type: application/json
 Accept: application/json
-Authorization: Bearer 3|R4XdxOnRroaoXhmv3cwFJpad3KNRAx0LBPWojFXF630b8e10
+Authorization: Bearer 2|Kvs4yAfCmf5rXshf5KeFCnIhtqFc0BuxeO5qtYrn96b9fb30
 
 {
     "customer_name": "Nguyễn Văn A (Khách lẻ)",

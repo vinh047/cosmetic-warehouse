@@ -19,25 +19,24 @@
         td:last-child { font-weight: 600; color: #2d3748; text-align: right; }
         tr:last-child td { border-bottom: none; padding-bottom: 0; }
 
-        .attachment-box { background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; padding: 20px; text-align: center; margin-top: 25px; }
-        .attachment-box p { margin: 5px 0 0 0; color: #2e7d32; font-size: 15px; font-weight: 500; }
-        .icon-excel { font-size: 28px; display: block; margin-bottom: 5px; }
+        .download-box { text-align: center; margin-top: 35px; margin-bottom: 25px; }
+        .btn-download { display: inline-block; background-color: #107c41; color: #ffffff; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 124, 65, 0.2); }
+        .btn-download:hover { background-color: #0b5e31; }
+        .note-text { font-size: 13px; color: #e53e3e; margin-top: 10px; }
         
         .footer { background-color: #f8fafc; padding: 20px 30px; font-size: 12px; color: #a0aec0; text-align: center; border-top: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
     <div class="email-wrapper">
-        <!-- HEADER MÀU XANH EXCEL -->
         <div class="email-header">
             <h2>Hệ Thống Quản Lý Kho</h2>
         </div>
 
         <div class="email-body">
             <p style="margin-top: 0; font-size: 16px;">Kính gửi Ban Quản lý,</p>
-            <p style="font-size: 15px; color: #4a5568;">Hệ thống đã hoàn tất việc trích xuất dữ liệu giao dịch kho theo yêu cầu của bạn. Quá trình xử lý hàng chục ngàn dòng dữ liệu đã diễn ra thành công qua hệ thống xử lý ngầm (Queue).</p>
+            <p style="font-size: 15px; color: #4a5568;">Hệ thống đã hoàn tất việc trích xuất dữ liệu giao dịch kho theo yêu cầu của bạn. File báo cáo đã sẵn sàng để tải xuống.</p>
 
-            <!-- KHUNG THÔNG TIN BÁO CÁO -->
             <div class="report-card">
                 <h3 class="report-title">Thông tin trích xuất</h3>
                 <table>
@@ -62,21 +61,19 @@
                 </table>
             </div>
 
-            <!-- KHUNG HIGHLIGHT FILE ĐÍNH KÈM -->
-            <div class="attachment-box">
-                <span class="icon-excel">📊</span>
-                <p>Tệp dữ liệu báo cáo đã được đính kèm ở cuối email này.</p>
-                <p style="font-size: 13px; font-weight: normal; color: #4caf50; margin-top: 8px;">Vui lòng tải xuống thiết bị để mở bằng Excel hoặc Google Sheets.</p>
+            <!-- NÚT BẤM TẢI XUỐNG -->
+            <div class="download-box">
+                <a href="{{ $downloadUrl }}" class="btn-download">⬇ Tải Xuống Báo Cáo Excel</a>
+                <p class="note-text">* Link tải xuống được bảo mật và sẽ tự động hết hạn sau 7 ngày.</p>
             </div>
             
             <p style="margin-bottom: 0; margin-top: 30px; font-size: 15px;">Trân trọng,</p>
             <p style="margin-top: 5px; font-weight: 600; font-size: 15px;">Đội ngũ Quản trị Hệ thống</p>
         </div>
 
-        <!-- FOOTER BẢO MẬT -->
         <div class="footer">
-            <p style="margin: 0; padding-bottom: 8px;"><strong>CẢNH BÁO BẢO MẬT:</strong> Báo cáo này chứa thông tin giao dịch kinh doanh nội bộ. Vui lòng không chia sẻ tệp đính kèm với người ngoài tổ chức.</p>
-            <p style="margin: 0;">Email này được tự động gửi từ hệ thống Logistics & Inventory. Vui lòng không trả lời thư này.</p>
+            <p style="margin: 0; padding-bottom: 8px;"><strong>CẢNH BÁO BẢO MẬT:</strong> Link tải này chứa Token bảo mật riêng biệt. Vui lòng không chuyển tiếp email này cho người ngoài tổ chức.</p>
+            <p style="margin: 0;">Email này được tự động gửi từ hệ thống Logistics & Inventory.</p>
         </div>
     </div>
 </body>

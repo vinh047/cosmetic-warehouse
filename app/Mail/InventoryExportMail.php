@@ -2,22 +2,19 @@
 
 namespace App\Mail;
 
-use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 
 class InventoryExportMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
 
     public function __construct(
-        public string $filePath,
-        public string $fileName,
         public int $month,
-        public int $year
+        public int $year,
+        public string $downloadUrl 
     ) {}
 
     public function envelope(): Envelope
@@ -33,19 +30,10 @@ class InventoryExportMail extends Mailable
             view: 'emails.reports.inventory-export',
             with: [
                 'month' => $this->month,
-                'year' => $this->year
+                'year' => $this->year,
+                'downloadUrl' => $this->downloadUrl 
             ]
         );
     }
 
-    public function attachments(): array
-    {
-        return [
-
-            Attachment::fromStorageDisk('local', $this->filePath)
-                ->as($this->fileName)
-                ->withMime('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-        ];
-    }
 }
