@@ -1,0 +1,23 @@
+@baseUrl = http://localhost:8000/api
+@token = 3|JU2a2HmOLSPVCACglh6nBSE6W0xk7YJihYacFeSfcadd2675
+###. [Protected] Yêu cầu xuất Báo cáo Giao dịch Kho (Async Data Export)
+# Trả về mã 202 Accepted ngay lập tức, Queue sẽ tạo file Excel ngầm
+POST {{baseUrl}}/reports/inventory-export
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer 2|Kvs4yAfCmf5rXshf5KeFCnIhtqFc0BuxeO5qtYrn96b9fb30
+
+{
+    "month": 3,
+    "year": 2026
+}
+
+### 5. [Protected] Test lỗi Validate (Bỏ trống hoặc điền sai tháng)
+POST {{baseUrl}}/reports/inventory-export
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "month": 13
+}

@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             WarehouseSeeder::class,
             ProductSeeder::class,
             ProductBatchSeeder::class,
+            ProductAlertSeeder::class,
             StockSeeder::class,
             OrderSeeder::class, // Bao gồm cả OrderItems
             InventoryTransactionSeeder::class,

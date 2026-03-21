@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\OrderStatus;
+use App\Events\OrderCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
@@ -47,7 +48,7 @@ class OrderController extends Controller
             $userId = $request->user()->id;
 
             $order = $this->orderService->createOrder($request->validated(), $userId);
-
+            OrderCreated::dispatch($order);
             return response()->json([
                 'success' => true,
                 'message' => 'Order created successfully.',
@@ -82,7 +83,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         Gate::authorize('updateStatus', $order);
-        
+
         $this->authorize('updateStatus', $order);
 
         $validated = $request->validate([
