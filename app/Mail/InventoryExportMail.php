@@ -17,8 +17,7 @@ class InventoryExportMail extends Mailable
         public string $filePath,
         public string $fileName,
         public int $month,
-        public int $year,
-        public string $downloadUrl
+        public int $year
     ) {}
 
     public function envelope(): Envelope
@@ -34,8 +33,7 @@ class InventoryExportMail extends Mailable
             view: 'emails.reports.inventory-export',
             with: [
                 'month' => $this->month,
-                'year' => $this->year,
-                'downloadUrl' => $this->downloadUrl 
+                'year' => $this->year
             ]
         );
     }
