@@ -71,7 +71,7 @@
 
         td:first-child {
             color: #718096;
-            width: 45%;
+            width: 35%;
         }
 
         td:last-child {
@@ -83,34 +83,6 @@
         tr:last-child td {
             border-bottom: none;
             padding-bottom: 0;
-        }
-
-        .download-box {
-            text-align: center;
-            margin-top: 35px;
-            margin-bottom: 25px;
-        }
-
-        .btn-download {
-            display: inline-block;
-            background-color: #107c41;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 14px 30px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 4px 6px rgba(16, 124, 65, 0.2);
-        }
-
-        .btn-download:hover {
-            background-color: #0b5e31;
-        }
-
-        .note-text {
-            font-size: 13px;
-            color: #e53e3e;
-            margin-top: 10px;
         }
 
         .footer {
@@ -132,7 +104,7 @@
 
         <div class="email-body">
             <p style="margin-top: 0; font-size: 16px;">Kính gửi Ban Quản lý,</p>
-            <p style="font-size: 15px; color: #4a5568;">Hệ thống đã hoàn tất việc trích xuất dữ liệu giao dịch kho theo yêu cầu của bạn. File báo cáo đã được <strong>đính kèm trực tiếp trong email này</strong>, đồng thời bạn cũng có thể lưu trữ qua liên kết tải xuống bên dưới.</p>
+            <p style="font-size: 15px; color: #4a5568;">Hệ thống đã hoàn tất việc trích xuất dữ liệu giao dịch kho theo yêu cầu của bạn. File báo cáo đã được <strong>đính kèm trực tiếp trong email này</strong>. Vui lòng mở hoặc tải xuống file đính kèm ở bên dưới để xem chi tiết.</p>
 
             <div class="report-card">
                 <h3 class="report-title">Thông tin trích xuất</h3>
@@ -147,8 +119,8 @@
                             <td>Tháng {{ $month }} - Năm {{ $year }}</td>
                         </tr>
                         <tr>
-                            <td>Định dạng tệp</td>
-                            <td>Microsoft Excel (.xlsx)</td>
+                            <td>Tên tệp đính kèm</td>
+                            <td style="color: #107c41;">{{ $fileName }}</td>
                         </tr>
                         <tr>
                             <td>Thời điểm hoàn thành</td>
@@ -156,11 +128,6 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-
-            <div class="download-box">
-                <a href="{{ $downloadUrl }}" class="btn-download">⬇ Tải Xuống Báo Cáo Excel</a>
-                <p class="note-text">* Link dự phòng này được bảo mật và sẽ tự động hết hạn sau 7 ngày.</p>
             </div>
 
             <p style="margin-bottom: 0; margin-top: 30px; font-size: 15px;">Trân trọng,</p>
