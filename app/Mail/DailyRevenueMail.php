@@ -7,10 +7,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Carbon\Carbon;
+use Illuminate\Foundation\Queue\Queueable;
 
 class DailyRevenueMail extends Mailable
 {
-    use SerializesModels;
+    use Queueable, SerializesModels;
 
     public function __construct(
         public Carbon $date,
@@ -40,6 +41,13 @@ class DailyRevenueMail extends Mailable
     {
         return new Content(
             view: 'emails.reports.daily-revenue',
+            // Thêm mảng dữ liệu này vào
+            with: [
+                'date' => $this->date,
+                'totalOrders' => $this->totalOrders,
+                'totalRevenue' => $this->totalRevenue,
+                'totalProductsSold' => $this->totalProductsSold,
+            ],
         );
     }
 }
