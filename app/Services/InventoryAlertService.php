@@ -26,23 +26,53 @@ class InventoryAlertService
             
             if (!$product || !$product->alert) continue;
 
-            $totalStock = DB::table('stocks')
-                ->join('product_batches', 'stocks.product_batch_id', '=', 'product_batches.id')
-                ->where('product_batches.product_id', $productId)
-                ->sum('stocks.quantity');
-
-            if ($totalStock <= $product->alert->stock_threshold) {
-                $lastAlert = $product->alert->last_stock_alert_at;
+            $lastAlert = $product->alert->last_stock_alert_at;
                 
-                // Tránh spam: Chỉ gửi nếu chưa gửi hoặc đã qua 24 tiếng
-                if (!$lastAlert || $lastAlert->diffInHours(now()) >= 24) {
-                    $alertsToSend[] = (object)[
-                        'name' => $product->name,
-                        'sku' => $product->sku,
-                        'total_qty' => $totalStock,
-                        'stock_threshold' => $product->alert->stock_threshold
-                    ];
+            // Tránh spam: Chỉ kiểm tra và gửi nếu chưa gửi hoặc đã qua 24 tiếng
+            if (!$lastAlert || Carbon::parse($lastAlert)->diffInHours(now()) >= 24) {
+                
+                // Tính tổng tồn theo TỪNG KHO
+                $stocksPerWarehouse = DB::table('stocks')
+                    ->join('product_batches', 'stocks.product_batch_id', '=', 'product_batches.id')
+                    ->join('warehouses', 'stocks.warehouse_id', '=', 'warehouses.id')
+                    ->where('product_batches.product_id', $productId)
+                    ->select('warehouses.name as warehouse_name', DB::raw('SUM(stocks.quantity) as total_qty'))
+                    ->groupBy('stocks.warehouse_id', 'warehouses.name')
+                    ->get();
 
+                $hasLowStock = false;
+
+                // Trường hợp 1: Sản phẩm chưa từng có record trong kho (Tổng tồn = 0 toàn hệ thống)
+                if ($stocksPerWarehouse->isEmpty()) {
+                    if (0 <= $product->alert->stock_threshold) {
+                        $alertsToSend[] = (object)[
+                            'name' => $product->name,
+                            'sku' => $product->sku,
+                            'warehouse_name' => 'Chưa có dữ liệu kho (Tồn = 0)',
+                            'total_qty' => 0,
+                            'stock_threshold' => $product->alert->stock_threshold
+                        ];
+                        $hasLowStock = true;
+                    }
+                } 
+                // Trường hợp 2: Quét từng kho xem kho nào dưới mức cảnh báo
+                else {
+                    foreach ($stocksPerWarehouse as $stock) {
+                        if ($stock->total_qty <= $product->alert->stock_threshold) {
+                            $alertsToSend[] = (object)[
+                                'name' => $product->name,
+                                'sku' => $product->sku,
+                                'warehouse_name' => $stock->warehouse_name,
+                                'total_qty' => $stock->total_qty,
+                                'stock_threshold' => $product->alert->stock_threshold
+                            ];
+                            $hasLowStock = true;
+                        }
+                    }
+                }
+
+                // Nếu có ít nhất 1 kho báo động, cập nhật lại thời gian để ngắt spam
+                if ($hasLowStock) {
                     $product->alert->update(['last_stock_alert_at' => now()]);
                 }
             }
@@ -59,7 +89,7 @@ class InventoryAlertService
     public function checkDailyAlerts()
     {
         // ==========================================
-        // 1. QUÉT HÀNG CẬN DATE
+        // 1. QUÉT HÀNG CẬN DATE (Mình giữ nguyên vì ngày hết hạn đi theo Lô, không bị ảnh hưởng bởi logic Kho)
         // ==========================================
         $expiringBatches = DB::select("
             SELECT p.id as product_id, p.name, p.sku, pb.batch_code, pb.expiry_date, s.quantity, pa.last_expiry_alert_at, pa.expiry_threshold_days
@@ -76,7 +106,6 @@ class InventoryAlertService
 
         foreach ($expiringBatches as $batch) {
             $lastAlert = $batch->last_expiry_alert_at ? Carbon::parse($batch->last_expiry_alert_at) : null;
-            // Báo cận date 7 ngày 1 lần
             if (!$lastAlert || $lastAlert->diffInDays(now()) >= 7) {
                 $expiringToSend[] = $batch;
                 $expiringProductIdsToUpdate[] = $batch->product_id;
@@ -84,17 +113,19 @@ class InventoryAlertService
         }
 
         // ==========================================
-        // 2. QUÉT VÉT HÀNG SẮP HẾT (LOW STOCK)
+        // 2. QUÉT VÉT HÀNG SẮP HẾT (LOW STOCK) - BÁO TỪNG KHO
         // ==========================================
-        // Lưu ý: Dùng LEFT JOIN để bắt được cả những sản phẩm có tồn kho bằng 0 (không có trong bảng stocks)
         $lowStocks = DB::select("
-            SELECT p.id as product_id, p.name, p.sku, pa.stock_threshold, pa.last_stock_alert_at, COALESCE(SUM(s.quantity), 0) as total_qty
+            SELECT p.id as product_id, p.name, p.sku, pa.stock_threshold, pa.last_stock_alert_at, 
+                   COALESCE(w.name, 'Chưa có dữ liệu kho') as warehouse_name, 
+                   COALESCE(SUM(s.quantity), 0) as total_qty
             FROM products p
             JOIN product_alerts pa ON p.id = pa.product_id
             LEFT JOIN product_batches pb ON p.id = pb.product_id
             LEFT JOIN stocks s ON pb.id = s.product_batch_id
+            LEFT JOIN warehouses w ON s.warehouse_id = w.id
             WHERE p.is_active = 1
-            GROUP BY p.id, p.name, p.sku, pa.stock_threshold, pa.last_stock_alert_at
+            GROUP BY p.id, p.name, p.sku, pa.stock_threshold, pa.last_stock_alert_at, w.id, w.name
             HAVING total_qty <= pa.stock_threshold
         ");
 
@@ -103,7 +134,6 @@ class InventoryAlertService
 
         foreach ($lowStocks as $stock) {
             $lastAlert = $stock->last_stock_alert_at ? Carbon::parse($stock->last_stock_alert_at) : null;
-            // Báo sắp hết hàng 24h 1 lần
             if (!$lastAlert || $lastAlert->diffInHours(now()) >= 24) {
                 $lowStocksToSend[] = $stock;
                 $lowStockProductIdsToUpdate[] = $stock->product_id;
@@ -117,7 +147,6 @@ class InventoryAlertService
             
             $this->sendEmail($lowStocksToSend, $expiringToSend);
             
-            // Cập nhật lại thời gian đã gửi mail để chặn spam cho lần quét ngày mai
             if (count($expiringProductIdsToUpdate) > 0) {
                 ProductAlert::whereIn('product_id', array_unique($expiringProductIdsToUpdate))
                     ->update(['last_expiry_alert_at' => now()]);

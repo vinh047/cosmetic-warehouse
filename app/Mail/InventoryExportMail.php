@@ -2,19 +2,23 @@
 
 namespace App\Mail;
 
+use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 
 class InventoryExportMail extends Mailable
 {
-    use SerializesModels;
+    use Queueable, SerializesModels;
 
     public function __construct(
+        public string $filePath,
+        public string $fileName,
         public int $month,
         public int $year,
-        public string $downloadUrl 
+        public string $downloadUrl
     ) {}
 
     public function envelope(): Envelope
@@ -36,4 +40,12 @@ class InventoryExportMail extends Mailable
         );
     }
 
+    public function attachments(): array
+    {
+        return [
+            Attachment::fromStorageDisk('local', $this->filePath)
+                ->as($this->fileName)
+                ->withMime('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        ];
+    }
 }
