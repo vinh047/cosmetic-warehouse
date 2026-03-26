@@ -5,10 +5,10 @@ namespace App\Services;
 use App\Models\Product;
 use App\Models\ProductAlert;
 use App\Models\User;
-use App\Mail\InventoryAlertMail;
+use App\Notifications\InventoryAlertNotification; // <-- Đổi sang dùng Notification
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification; // <-- Dùng Facade Notification
 use Carbon\Carbon;
 
 class InventoryAlertService
@@ -21,21 +21,22 @@ class InventoryAlertService
         $productIds = array_unique($productIds);
         $alertsToSend = [];
 
-        foreach ($productIds as $productId) {
-            $product = Product::with('alert')->find($productId);
-            
-            if (!$product || !$product->alert) continue;
+        // TỐI ƯU HÓA: Lấy tất cả product trong 1 câu query thay vì find() trong vòng lặp foreach
+        $products = Product::with('alert')->whereIn('id', $productIds)->get();
+
+        foreach ($products as $product) {
+            if (!$product->alert) continue;
 
             $lastAlert = $product->alert->last_stock_alert_at;
-                
+
             // Tránh spam: Chỉ kiểm tra và gửi nếu chưa gửi hoặc đã qua 24 tiếng
             if (!$lastAlert || Carbon::parse($lastAlert)->diffInHours(now()) >= 24) {
-                
+
                 // Tính tổng tồn theo TỪNG KHO
                 $stocksPerWarehouse = DB::table('stocks')
                     ->join('product_batches', 'stocks.product_batch_id', '=', 'product_batches.id')
                     ->join('warehouses', 'stocks.warehouse_id', '=', 'warehouses.id')
-                    ->where('product_batches.product_id', $productId)
+                    ->where('product_batches.product_id', $product->id)
                     ->select('warehouses.name as warehouse_name', DB::raw('SUM(stocks.quantity) as total_qty'))
                     ->groupBy('stocks.warehouse_id', 'warehouses.name')
                     ->get();
@@ -54,7 +55,7 @@ class InventoryAlertService
                         ];
                         $hasLowStock = true;
                     }
-                } 
+                }
                 // Trường hợp 2: Quét từng kho xem kho nào dưới mức cảnh báo
                 else {
                     foreach ($stocksPerWarehouse as $stock) {
@@ -79,7 +80,7 @@ class InventoryAlertService
         }
 
         if (count($alertsToSend) > 0) {
-            $this->sendEmail($alertsToSend, []);
+            $this->sendNotification($alertsToSend, []); // Đổi tên hàm gọi
         }
     }
 
@@ -89,7 +90,7 @@ class InventoryAlertService
     public function checkDailyAlerts()
     {
         // ==========================================
-        // 1. QUÉT HÀNG CẬN DATE (Mình giữ nguyên vì ngày hết hạn đi theo Lô, không bị ảnh hưởng bởi logic Kho)
+        // 1. QUÉT HÀNG CẬN DATE
         // ==========================================
         $expiringBatches = DB::select("
             SELECT p.id as product_id, p.name, p.sku, pb.batch_code, pb.expiry_date, s.quantity, pa.last_expiry_alert_at, pa.expiry_threshold_days
@@ -113,7 +114,7 @@ class InventoryAlertService
         }
 
         // ==========================================
-        // 2. QUÉT VÉT HÀNG SẮP HẾT (LOW STOCK) - BÁO TỪNG KHO
+        // 2. QUÉT VÉT HÀNG SẮP HẾT (LOW STOCK)
         // ==========================================
         $lowStocks = DB::select("
             SELECT p.id as product_id, p.name, p.sku, pa.stock_threshold, pa.last_stock_alert_at, 
@@ -141,12 +142,12 @@ class InventoryAlertService
         }
 
         // ==========================================
-        // 3. TỔNG HỢP VÀ GỬI EMAIL CHUNG
+        // 3. TỔNG HỢP VÀ GỬI NOTIFICATION
         // ==========================================
         if (count($expiringToSend) > 0 || count($lowStocksToSend) > 0) {
-            
-            $this->sendEmail($lowStocksToSend, $expiringToSend);
-            
+
+            $this->sendNotification($lowStocksToSend, $expiringToSend); // Đổi tên hàm gọi
+
             if (count($expiringProductIdsToUpdate) > 0) {
                 ProductAlert::whereIn('product_id', array_unique($expiringProductIdsToUpdate))
                     ->update(['last_expiry_alert_at' => now()]);
@@ -160,23 +161,24 @@ class InventoryAlertService
     }
 
     /**
-     * Hàm gửi mail chung
+     * Hàm gửi thông báo (thay thế cho sendEmail cũ)
      */
-    private function sendEmail($lowStocks, $expiringBatches)
+    private function sendNotification($lowStocks, $expiringBatches)
     {
         try {
+            // Lấy ra Collection các user thay vì chỉ lấy mảng email
             $managers = User::whereIn('role', ['admin', 'manager'])
                 ->where('is_active', true)
-                ->pluck('email')
-                ->toArray();
-                
-            if (!empty($managers)) {
-                Mail::to($managers)->send(new InventoryAlertMail($lowStocks, $expiringBatches));
+                ->get();
+
+            if ($managers->isNotEmpty()) {
+                // Laravel tự động duyệt qua các user và gửi thông báo
+                Notification::send($managers, new InventoryAlertNotification($lowStocks, $expiringBatches));
             } else {
-                Log::warning('InventoryAlert: Không có tài khoản admin/manager nào để gửi mail báo cáo.');
+                Log::warning('InventoryAlert: Không có tài khoản admin/manager nào để nhận thông báo.');
             }
         } catch (\Exception $e) {
-            Log::error('Lỗi gửi mail cảnh báo kho: ' . $e->getMessage());
+            Log::error('Lỗi gửi cảnh báo kho: ' . $e->getMessage());
         }
     }
 }
