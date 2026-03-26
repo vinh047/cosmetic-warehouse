@@ -40,29 +40,31 @@ class GenerateExcelReportJob implements ShouldQueue
         try {
             Log::info("Job Excel: Bắt đầu xử lý dữ liệu cho {$manager->email}");
 
-            // 1. Tạo tên file duy nhất (tránh trùng lặp nếu xuất nhiều lần)
+            // 1. Tạo tên file duy nhất
             $timestamp = time();
             $fileName = "inventory_report_{$this->month}_{$this->year}_{$timestamp}.xlsx";
             $filePath = "reports/{$fileName}";
 
-            // 2. Lưu file Excel vào thư mục storage/app/reports
+            // 2. Lưu file Excel vào storage (không xóa ngay để link tải còn hoạt động)
             Excel::store(new InventoryTransactionExport($this->month, $this->year), $filePath, 'local');
 
             // 3. Tạo link tải file có mã hóa (sống trong 7 ngày)
             $downloadUrl = URL::temporarySignedRoute(
                 'report.download', 
-                now()->addDays(7), // Link hết hạn sau 7 ngày
+                now()->addDays(7),
                 ['fileName' => $fileName]
             );
 
-            // 4. Gửi Mail chứa link tải
+            // 4. Gửi Mail (Vừa đính kèm file, vừa cấp link tải)
             Mail::to($manager->email)->send(new InventoryExportMail(
+                $filePath,
+                $fileName,
                 $this->month, 
                 $this->year,
-                $downloadUrl // Truyền link vào mail
+                $downloadUrl
             ));
 
-            Log::info("Job Excel: Đã gửi link báo cáo thành công tới {$manager->email}");
+            Log::info("Job Excel: Đã gửi báo cáo (đính kèm + link tải) thành công tới {$manager->email}");
 
         } catch (\Exception $e) {
             Log::error("Job Excel Thất bại: " . $e->getMessage());
