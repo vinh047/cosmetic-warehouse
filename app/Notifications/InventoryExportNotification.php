@@ -27,12 +27,12 @@ class InventoryExportNotification extends Notification
      */
     public function toMail(object $notifiable)
     {
-        return (new InventoryExportMail(
+        return new InventoryExportMail( // ← bỏ ->to($notifiable->email)
             $this->filePath,
             $this->fileName,
             $this->month,
             $this->year
-        ))->to($notifiable->email);
+        );
     }
 
     /**

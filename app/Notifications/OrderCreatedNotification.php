@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class OrderCreatedNotification extends Notification
@@ -19,7 +20,23 @@ class OrderCreatedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database']; // ← thêm 'mail'
+    }
+
+    /**
+     * Gửi email thông báo đơn hàng mới cho admin/manager
+     */
+    public function toMail(object $notifiable): MailMessage // ← thêm hàm này
+    {
+        return (new MailMessage)
+            ->subject('🛒 Đơn hàng mới: ' . $this->order->order_code)
+            ->greeting('Xin chào ' . $notifiable->name . '!')
+            ->line('Một đơn hàng mới vừa được tạo trên hệ thống.')
+            ->line('**Mã đơn:** ' . $this->order->order_code)
+            ->line('**Khách hàng:** ' . $this->order->customer_name)
+            ->line('**Tổng tiền:** ' . number_format($this->order->total_price) . ' VNĐ')
+            ->action('Xem đơn hàng', url('/orders/' . $this->order->id))
+            ->salutation('Trân trọng, Hệ thống Cosmetic Warehouse');
     }
 
     /**
@@ -30,8 +47,8 @@ class OrderCreatedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => 'Co don hang moi',
-            'message' => "Don {$this->order->order_code} vua duoc tao.",
+            'title' => 'Có đơn hàng mới',
+            'message' => "Đơn {$this->order->order_code} vừa được tạo.",
             'order_id' => $this->order->id,
             'order_code' => $this->order->order_code,
             'customer_name' => $this->order->customer_name,
